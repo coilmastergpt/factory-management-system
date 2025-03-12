@@ -1,24 +1,34 @@
 {
   "pages": {
+    "/users/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/users/page.js"
+    ],
     "/global-error": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/global-error.js"
-    ],
-    "/error": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/error.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/layout.js"
     ],
+    "/error": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/error.js"
+    ],
     "/not-found": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
+    ],
+    "/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/settings/page.js"
     ],
     "/page": [
       "static/chunks/webpack.js",
@@ -40,15 +50,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/issues/page.js"
     ],
-    "/settings/page": [
+    "/issues/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/settings/page.js"
+      "static/chunks/app/issues/[id]/page.js"
     ],
-    "/users/page": [
+    "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/users/page.js"
+      "static/chunks/app/dashboard/page.js"
     ]
   }
 }

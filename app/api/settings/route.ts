@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Worker 인터페이스 정의
+interface Worker {
+  id: string;
+  name: string;
+  companyId: string; // 직원 ID로 사용되지만 필드명은 그대로 유지
+  email: string;
+  department: string;
+  role: string;
+}
+
 // 임시 데이터 저장소 (실제로는 데이터베이스에 저장해야 함)
 let priorities = [
   { id: 'priority-1', name: '낮음', value: 'LOW', color: 'gray' },
@@ -15,7 +25,7 @@ let departments = [
   { id: 'dept-4', name: '안전', value: '안전' },
 ];
 
-let workers = [
+let workers: Worker[] = [
   { id: 'worker-1', name: '김작업자', companyId: 'EMP001', email: 'worker1@example.com', department: '생산', role: 'WORKER' },
   { id: 'worker-2', name: '이엔지니어', companyId: 'EMP002', email: 'worker2@example.com', department: '품질', role: 'WORKER' },
   { id: 'worker-3', name: '박기술자', companyId: 'EMP003', email: 'worker3@example.com', department: '유지보수', role: 'WORKER' },

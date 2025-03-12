@@ -6,6 +6,7 @@ import path from 'path';
 // 데이터 파일 경로 설정
 const DATA_DIR = path.join(process.cwd(), 'data');
 const ISSUES_FILE = path.join(DATA_DIR, 'issues.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 // 모의 데이터 생성
 const workers = [
@@ -22,6 +23,17 @@ const issueTypes = [
   { id: 'type-3', name: '작업자 문제', value: '작업자 문제' },
   { id: 'type-4', name: '지그 문제', value: '지그 문제' }
 ];
+
+// 사용자 인터페이스 정의
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  createdAt: string;
+  companyId?: string;
+}
 
 // 이슈 인터페이스 정의
 interface Issue {
@@ -49,6 +61,21 @@ interface Issue {
   resolvedAt: string | null;
   solution: string | null;
 }
+
+// 사용자 데이터 로드
+const loadUsers = (): User[] => {
+  try {
+    if (!fs.existsSync(USERS_FILE)) {
+      return [];
+    }
+    
+    const data = fs.readFileSync(USERS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('사용자 데이터 로드 오류:', error);
+    return [];
+  }
+};
 
 // 모의 이슈 데이터 생성
 const generateMockIssues = (count: number): Issue[] => {
@@ -78,8 +105,8 @@ const generateMockIssues = (count: number): Issue[] => {
     
     return {
       id: `issue-${index + 1}`,
-      title: `이슈 ${index + 1}: ${departments[Math.floor(Math.random() * departments.length)]} 부서 문제`,
-      description: `이슈 ${index + 1}에 대한 상세 설명입니다. 이 문제는 ${createdDate.toLocaleDateString()}에 발생했습니다.`,
+      title: `${departments[Math.floor(Math.random() * departments.length)]} 부서 문제`,
+      description: `이슈에 대한 상세 설명입니다. 이 문제는 ${createdDate.toLocaleDateString()}에 발생했습니다.`,
       status: status,
       priority: priorities[Math.floor(Math.random() * priorities.length)],
       department: departments[Math.floor(Math.random() * departments.length)],
@@ -160,12 +187,17 @@ export async function GET(request: NextRequest) {
     const searchParams = url.searchParams;
     
     // 필터 파라미터 추출
-    const statusFilter = searchParams.get('filter[status]');
-    const priorityFilter = searchParams.get('filter[priority]');
-    const departmentFilter = searchParams.get('filter[department]');
-    const assignedToFilter = searchParams.get('filter[assignedToId]');
-    const createdByFilter = searchParams.get('filter[createdById]');
-    const issueTypeFilter = searchParams.get('filter[issueType]');
+    const statusFilter = searchParams.get('status');
+    const priorityFilter = searchParams.get('priority');
+    const departmentFilter = searchParams.get('department');
+    const assignedToFilter = searchParams.get('assignedToId');
+    const createdByFilter = searchParams.get('createdById');
+    const issueTypeFilter = searchParams.get('issueType');
+    
+    // 날짜 필터 추출
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const month = searchParams.get('month');
     
     // 검색어 추출
     const searchTerm = searchParams.get('search');
@@ -216,6 +248,26 @@ export async function GET(request: NextRequest) {
         issue.title.toLowerCase().includes(searchLower) || 
         issue.description.toLowerCase().includes(searchLower)
       );
+    }
+    
+    // 날짜 필터 적용
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // 종료일의 끝으로 설정
+      
+      filteredIssues = filteredIssues.filter(issue => {
+        const createdAt = new Date(issue.createdAt);
+        return createdAt >= start && createdAt <= end;
+      });
+    } else if (month) {
+      const currentYear = new Date().getFullYear();
+      const monthIndex = parseInt(month) - 1; // JavaScript의 월은 0부터 시작
+      
+      filteredIssues = filteredIssues.filter(issue => {
+        const createdAt = new Date(issue.createdAt);
+        return createdAt.getMonth() === monthIndex;
+      });
     }
     
     // 정렬 적용
@@ -290,18 +342,30 @@ export async function POST(request: NextRequest) {
     // 담당자 정보 찾기 (있는 경우)
     let assignedTo = null;
     if (data.assignedToId) {
+      // 먼저 workers 배열에서 찾기
       assignedTo = workers.find(w => w.id === data.assignedToId);
+      
+      // workers에 없으면 사용자 데이터에서 찾기
       if (!assignedTo) {
-        return NextResponse.json(
-          { error: '유효하지 않은 담당자 ID입니다.' },
-          { status: 400 }
-        );
+        const users = loadUsers();
+        const user = users.find(u => u.id === data.assignedToId);
+        
+        if (user) {
+          assignedTo = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            companyId: user.companyId || ''
+          };
+        } else {
+          console.warn(`담당자 ID ${data.assignedToId}를 찾을 수 없습니다. 담당자 없이 이슈를 생성합니다.`);
+        }
       }
     }
     
     // 새 이슈 생성
     const now = new Date();
-    const newIssue = {
+    const newIssue: Issue = {
       id: `issue-${uuidv4()}`,
       title: data.title,
       description: data.description || '',

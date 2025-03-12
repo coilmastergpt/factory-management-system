@@ -66,14 +66,31 @@ export async function PUT(
 ) {
   try {
     const userId = params.id;
-    const data = await request.json();
+    const userData = await request.json();
     
     // 필수 필드 검증
-    if (!data.name || !data.email || !data.role || !data.department) {
-      return NextResponse.json(
-        { error: '모든 필수 필드를 입력해주세요.' },
-        { status: 400 }
-      );
+    if (!userData.name || !userData.email || !userData.role || !userData.department) {
+      return NextResponse.json({ error: '필수 정보가 누락되었습니다.' }, { status: 400 });
+    }
+    
+    // 작업자 관리에 등록된 직원 ID인지 확인
+    if (userData.companyId) {
+      // 작업자 데이터 로드
+      const workersResponse = await fetch(new URL('/api/settings?type=workers', request.url));
+      if (!workersResponse.ok) {
+        throw new Error('작업자 데이터를 불러오는데 실패했습니다.');
+      }
+      const workers = await workersResponse.json();
+      
+      // 직원 ID가 작업자 관리에 등록되어 있는지 확인
+      const isWorkerRegistered = workers.some((worker: any) => worker.companyId === userData.companyId);
+      
+      if (!isWorkerRegistered) {
+        return NextResponse.json({ 
+          error: '등록되지 않은 직원 ID', 
+          message: '해당 직원 ID는 작업자 관리에 등록되어 있지 않습니다. 먼저 설정의 작업자 관리에서 등록해주세요.' 
+        }, { status: 400 });
+      }
     }
     
     // 사용자 데이터 불러오기
@@ -82,44 +99,36 @@ export async function PUT(
     // 사용자 찾기
     const userIndex = users.findIndex(user => user.id === userId);
     if (userIndex === -1) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
     }
     
     // 이메일 중복 검사 (자신의 이메일은 제외)
-    const emailExists = users.some(user => 
-      user.id !== userId && user.email.toLowerCase() === data.email.toLowerCase()
+    const emailExists = users.some(
+      user => user.email === userData.email && user.id !== userId
     );
     if (emailExists) {
-      return NextResponse.json(
-        { error: '이미 등록된 이메일 주소입니다.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '이미 등록된 이메일입니다.' }, { status: 400 });
     }
     
     // 사용자 정보 업데이트
-    users[userIndex] = {
+    const updatedUser = {
       ...users[userIndex],
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      department: data.department,
-      companyId: data.companyId || users[userIndex].companyId
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      department: userData.department,
+      companyId: userData.companyId || users[userIndex].companyId,
     };
     
-    // 데이터 저장
-    saveUsers(users);
+    users[userIndex] = updatedUser;
     
-    // 성공 응답
-    return NextResponse.json(users[userIndex]);
+    // 변경사항 저장
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(users, null, 2));
+    
+    return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('사용자 정보 업데이트 오류:', error);
-    return NextResponse.json(
-      { error: '사용자 정보 업데이트에 실패했습니다.' },
-      { status: 500 }
-    );
+    console.error('사용자 업데이트 오류:', error);
+    return NextResponse.json({ error: '사용자 정보 업데이트 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }
 

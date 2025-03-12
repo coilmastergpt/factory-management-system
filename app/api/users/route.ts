@@ -11,6 +11,7 @@ interface User {
   role: string;
   department: string;
   createdAt: string;
+  companyId?: string;
 }
 
 // 데이터 파일 경로
@@ -31,10 +32,10 @@ const loadUsers = (): User[] => {
   if (!fs.existsSync(DATA_FILE_PATH)) {
     // 초기 데이터 생성
     const initialUsers: User[] = [
-      { id: '1', name: '관리자', email: 'admin@example.com', role: 'ADMIN', department: '시스템관리', createdAt: new Date().toISOString() },
-      { id: '2', name: '매니저', email: 'manager@example.com', role: 'MANAGER', department: '운영', createdAt: new Date().toISOString() },
-      { id: '3', name: '사용자1', email: 'user1@example.com', role: 'USER', department: '생산', createdAt: new Date().toISOString() },
-      { id: '4', name: '사용자2', email: 'user2@example.com', role: 'USER', department: '품질관리', createdAt: new Date().toISOString() },
+      { id: '1', name: '관리자', email: 'admin@example.com', role: 'ADMIN', department: '시스템관리', createdAt: new Date().toISOString(), companyId: 'ADMIN-001' },
+      { id: '2', name: '매니저', email: 'manager@example.com', role: 'MANAGER', department: '운영', createdAt: new Date().toISOString(), companyId: 'MGR-001' },
+      { id: '3', name: '사용자1', email: 'user1@example.com', role: 'USER', department: '생산', createdAt: new Date().toISOString(), companyId: 'USR-001' },
+      { id: '4', name: '사용자2', email: 'user2@example.com', role: 'USER', department: '품질관리', createdAt: new Date().toISOString(), companyId: 'USR-002' },
     ];
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(initialUsers, null, 2));
     return initialUsers;
@@ -99,55 +100,64 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 새 사용자 등록
+// 사용자 생성
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const userData = await request.json();
     
     // 필수 필드 검증
-    if (!data.name || !data.email || !data.role || !data.department) {
-      return NextResponse.json(
-        { error: '모든 필수 필드를 입력해주세요.' },
-        { status: 400 }
-      );
+    if (!userData.name || !userData.email || !userData.role || !userData.department) {
+      return NextResponse.json({ error: '필수 정보가 누락되었습니다.' }, { status: 400 });
     }
     
-    // 사용자 데이터 불러오기
+    // 작업자 관리에 등록된 직원 ID인지 확인
+    if (userData.companyId) {
+      // 작업자 데이터 로드
+      const workersResponse = await fetch(new URL('/api/settings?type=workers', request.url));
+      if (!workersResponse.ok) {
+        throw new Error('작업자 데이터를 불러오는데 실패했습니다.');
+      }
+      const workers = await workersResponse.json();
+      
+      // 직원 ID가 작업자 관리에 등록되어 있는지 확인
+      const isWorkerRegistered = workers.some((worker: any) => worker.companyId === userData.companyId);
+      
+      if (!isWorkerRegistered) {
+        return NextResponse.json({ 
+          error: '등록되지 않은 직원 ID', 
+          message: '해당 직원 ID는 작업자 관리에 등록되어 있지 않습니다. 먼저 설정의 작업자 관리에서 등록해주세요.' 
+        }, { status: 400 });
+      }
+    }
+    
+    // 기존 사용자 불러오기
     const users = loadUsers();
     
     // 이메일 중복 검사
-    const emailExists = users.some(user => user.email.toLowerCase() === data.email.toLowerCase());
-    if (emailExists) {
-      return NextResponse.json(
-        { error: '이미 등록된 이메일 주소입니다.' },
-        { status: 400 }
-      );
+    const existingUser = users.find(user => user.email === userData.email);
+    if (existingUser) {
+      return NextResponse.json({ error: '이미 등록된 이메일입니다.' }, { status: 400 });
     }
     
     // 새 사용자 생성
-    const newUser = {
+    const newUser: User = {
       id: uuidv4(),
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      department: data.department,
-      createdAt: new Date().toISOString()
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      department: userData.department,
+      createdAt: new Date().toISOString(),
+      companyId: userData.companyId || '',
     };
     
-    // 사용자 목록에 추가
+    // 사용자 추가 및 저장
     users.push(newUser);
-    
-    // 데이터 저장
     saveUsers(users);
     
-    // 성공 응답
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    console.error('사용자 등록 오류:', error);
-    return NextResponse.json(
-      { error: '사용자 등록에 실패했습니다.' },
-      { status: 500 }
-    );
+    console.error('사용자 생성 오류:', error);
+    return NextResponse.json({ error: '사용자 생성 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }
 

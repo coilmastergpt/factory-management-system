@@ -123,10 +123,10 @@
     "department": "생산",
     "issueType": "원자재 문제",
     "assignedTo": {
-      "id": "worker-2",
-      "name": "이엔지니어",
-      "email": "lee@example.com",
-      "companyId": "EMP002"
+      "id": "099fc83f-b8af-4390-acc2-23755c49d029",
+      "name": "SAM",
+      "email": "SAM@SAM.COM",
+      "department": "생산"
     },
     "createdBy": {
       "id": "worker-1",
@@ -135,7 +135,7 @@
       "companyId": "EMP001"
     },
     "createdAt": "2025-03-11T06:16:39.233Z",
-    "updatedAt": "2025-03-12T06:16:39.233Z",
+    "updatedAt": "2025-03-12T08:33:47.990Z",
     "resolvedAt": null,
     "solution": null
   },
@@ -148,10 +148,10 @@
     "department": "안전",
     "issueType": "원자재 문제",
     "assignedTo": {
-      "id": "worker-2",
-      "name": "이엔지니어",
-      "email": "lee@example.com",
-      "companyId": "EMP002"
+      "id": "e27ebccd-dcee-4768-a407-541fb3167b2c",
+      "name": "토이",
+      "email": "toy@toy.com",
+      "department": "생산"
     },
     "createdBy": {
       "id": "worker-2",
@@ -160,7 +160,7 @@
       "companyId": "EMP002"
     },
     "createdAt": "2025-03-11T06:16:39.233Z",
-    "updatedAt": "2025-03-13T06:16:39.233Z",
+    "updatedAt": "2025-03-12T08:34:02.850Z",
     "resolvedAt": "2025-03-16T06:16:39.233Z",
     "solution": "이슈 7에 대한 해결 방법입니다."
   },
@@ -218,10 +218,10 @@
     "department": "안전",
     "issueType": "원자재 문제",
     "assignedTo": {
-      "id": "worker-5",
-      "name": "정감독관",
-      "email": "jung@example.com",
-      "companyId": "EMP005"
+      "id": "694c8b72-dc63-4f95-b9a8-8e14a42aa6da",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "department": "생산"
     },
     "createdBy": {
       "id": "worker-4",
@@ -230,7 +230,7 @@
       "companyId": "EMP004"
     },
     "createdAt": "2025-03-11T06:16:39.233Z",
-    "updatedAt": "2025-03-14T06:16:39.233Z",
+    "updatedAt": "2025-03-12T10:54:06.541Z",
     "resolvedAt": null,
     "solution": null
   },
@@ -547,7 +547,12 @@
     "priority": "HIGH",
     "department": "안전",
     "issueType": "설비 문제",
-    "assignedTo": null,
+    "assignedTo": {
+      "id": "694c8b72-dc63-4f95-b9a8-8e14a42aa6da",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "department": "생산"
+    },
     "createdBy": {
       "id": "worker-3",
       "name": "박기술자",
@@ -555,7 +560,7 @@
       "companyId": "EMP003"
     },
     "createdAt": "2025-03-11T06:16:39.233Z",
-    "updatedAt": "2025-03-14T06:16:39.233Z",
+    "updatedAt": "2025-03-12T10:54:25.382Z",
     "resolvedAt": null,
     "solution": null
   },

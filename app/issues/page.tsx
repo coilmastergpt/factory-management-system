@@ -131,6 +131,11 @@ export default function IssuesPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<IssueFilter>({});
   const [sort, setSort] = useState<IssueSort>({ field: 'createdAt', order: 'desc' });
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: '',
+    month: ''
+  });
   const [newIssue, setNewIssue] = useState({
     title: '',
     description: '',
@@ -199,62 +204,58 @@ export default function IssuesPage() {
   
   // 이슈 목록 불러오기
   const fetchIssues = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      // 필터와 정렬 정보를 쿼리 파라미터로 변환
+      const queryParams = new URLSearchParams();
       
-      // 필터 및 정렬 파라미터 구성
-      const params = new URLSearchParams();
+      // 페이지네이션 정보 추가
+      queryParams.append('page', pagination.page.toString());
+      queryParams.append('limit', pagination.limit.toString());
       
-      if (filter.status) params.append('filter[status]', filter.status);
-      if (filter.priority) params.append('filter[priority]', filter.priority);
-      if (filter.department) params.append('filter[department]', filter.department);
-      if (filter.assignedToId) params.append('filter[assignedToId]', filter.assignedToId);
-      if (filter.createdById) params.append('filter[createdById]', filter.createdById);
-      if (filter.issueType) params.append('filter[issueType]', filter.issueType);
-      if (filter.search) params.append('search', filter.search);
+      // 정렬 정보 추가
+      queryParams.append('sortField', sort.field);
+      queryParams.append('sortOrder', sort.order);
       
-      params.append('sort_field', sort.field);
-      params.append('sort_order', sort.order);
-      params.append('page', pagination.page.toString());
-      params.append('limit', pagination.limit.toString());
+      // 필터 정보 추가
+      Object.entries(filter).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
       
-      console.log('API 요청 URL:', `/api/issues?${params.toString()}`);
+      // 날짜 필터 추가
+      if (dateFilter.startDate) {
+        queryParams.append('startDate', dateFilter.startDate);
+      }
+      if (dateFilter.endDate) {
+        queryParams.append('endDate', dateFilter.endDate);
+      }
+      if (dateFilter.month) {
+        queryParams.append('month', dateFilter.month);
+      }
       
-      // API 호출
-      const response = await fetch(`/api/issues?${params.toString()}`);
-      console.log('API 응답 상태:', response.status);
+      const response = await fetch(`/api/issues?${queryParams.toString()}`);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API 오류 응답:', errorText);
-        throw new Error(`이슈를 불러오는데 실패했습니다. 상태 코드: ${response.status}`);
+        throw new Error('이슈 목록을 불러오는데 실패했습니다.');
       }
       
       const data = await response.json();
-      console.log('API 응답 데이터:', data);
-      
-      setIssues(data.issues || []);
-      setPagination({
-        page: data.pagination.page,
-        limit: data.pagination.limit,
-        total: data.pagination.total,
-        totalPages: data.pagination.totalPages
-      });
+      setIssues(data.issues);
+      setPagination(prev => ({
+        ...prev,
+        total: data.total,
+        totalPages: Math.ceil(data.total / prev.limit)
+      }));
     } catch (error) {
-      console.error('이슈 불러오기 오류:', error);
+      console.error('이슈 목록 불러오기 오류:', error);
       toast({
-        title: '이슈 불러오기 실패',
-        description: `이슈 목록을 불러오는데 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`,
+        title: '이슈 목록 불러오기 실패',
+        description: '이슈 목록을 불러오는데 실패했습니다.',
         status: 'error',
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
-      });
-      // 오류 발생 시 빈 배열로 설정하여 로딩 상태 해제
-      setIssues([]);
-      setPagination({
-        ...pagination,
-        total: 0,
-        totalPages: 0
       });
     } finally {
       setLoading(false);
@@ -359,6 +360,32 @@ export default function IssuesPage() {
     }));
   };
   
+  // 날짜 필터 변경 핸들러
+  const handleDateFilterChange = (type: string, value: string) => {
+    setDateFilter(prev => ({
+      ...prev,
+      [type]: value
+    }));
+    
+    // 월 선택 시 시작일과 종료일 초기화
+    if (type === 'month' && value) {
+      setDateFilter(prev => ({
+        month: value,
+        startDate: '',
+        endDate: ''
+      }));
+    }
+    
+    // 날짜 범위 선택 시 월 선택 초기화
+    if ((type === 'startDate' || type === 'endDate') && value) {
+      setDateFilter(prev => ({
+        ...prev,
+        [type]: value,
+        month: ''
+      }));
+    }
+  };
+  
   // 이슈 상세 페이지로 이동
   const navigateToIssueDetail = (issueId: string) => {
     router.push(`/issues/${issueId}`);
@@ -375,7 +402,7 @@ export default function IssuesPage() {
   // 컴포넌트 마운트 시 이슈 목록 불러오기
   useEffect(() => {
     fetchIssues();
-  }, [filter, sort, pagination.page, pagination.limit]);
+  }, [filter, sort, pagination.page, pagination.limit, dateFilter]);
   
   return (
     <Container maxW="container.xl" py={5}>
@@ -398,6 +425,77 @@ export default function IssuesPage() {
             currentFilter={filter}
             onPresetSelect={setFilter}
           />
+        </Flex>
+        
+        {/* 날짜 필터 추가 */}
+        <Flex mt={4} gap={4} alignItems="center">
+          <Box>
+            <FormLabel fontSize="sm">날짜 범위</FormLabel>
+            <Flex gap={2} alignItems="center">
+              <Input
+                type="date"
+                value={dateFilter.startDate}
+                onChange={(e) => handleDateFilterChange('startDate', e.target.value)}
+                size="sm"
+                w="150px"
+              />
+              <Text>~</Text>
+              <Input
+                type="date"
+                value={dateFilter.endDate}
+                onChange={(e) => handleDateFilterChange('endDate', e.target.value)}
+                size="sm"
+                w="150px"
+              />
+            </Flex>
+          </Box>
+          
+          <Box>
+            <FormLabel fontSize="sm">월별 필터</FormLabel>
+            <Select
+              value={dateFilter.month}
+              onChange={(e) => handleDateFilterChange('month', e.target.value)}
+              size="sm"
+              w="150px"
+            >
+              <option value="">전체</option>
+              <option value="1">1월</option>
+              <option value="2">2월</option>
+              <option value="3">3월</option>
+              <option value="4">4월</option>
+              <option value="5">5월</option>
+              <option value="6">6월</option>
+              <option value="7">7월</option>
+              <option value="8">8월</option>
+              <option value="9">9월</option>
+              <option value="10">10월</option>
+              <option value="11">11월</option>
+              <option value="12">12월</option>
+            </Select>
+          </Box>
+          
+          <Button
+            colorScheme="blue"
+            size="sm"
+            onClick={fetchIssues}
+            ml={2}
+          >
+            필터 적용
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setDateFilter({
+                startDate: '',
+                endDate: '',
+                month: ''
+              });
+            }}
+          >
+            날짜 필터 초기화
+          </Button>
         </Flex>
       </Box>
       
@@ -453,14 +551,23 @@ export default function IssuesPage() {
                 </Tr>
               </Thead>
               <Tbody>
-                {issues.map((issue) => (
+                {issues.map((issue, index) => (
                   <Tr 
                     key={issue.id} 
                     _hover={{ bg: 'gray.50' }}
                     cursor="pointer"
                     onClick={() => navigateToIssueDetail(issue.id)}
                   >
-                    <Td fontWeight="medium">{issue.title}</Td>
+                    <Td fontWeight="medium">
+                      <Flex alignItems="center">
+                        <Badge mr={2} colorScheme="blue" borderRadius="full" px={2}>
+                          {pagination.page > 1 
+                            ? (pagination.page - 1) * pagination.limit + index + 1 
+                            : index + 1}
+                        </Badge>
+                        {issue.title}
+                      </Flex>
+                    </Td>
                     <Td>
                       <Badge colorScheme={statusColors[issue.status]}>
                         {issue.status === 'OPEN' && '대기중'}

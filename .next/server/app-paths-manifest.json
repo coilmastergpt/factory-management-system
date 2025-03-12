@@ -1,10 +1,16 @@
 {
-  "/page": "app/page.js",
   "/api/settings/route": "app/api/settings/route.js",
-  "/issues/page": "app/issues/page.js",
-  "/api/filter-presets/route": "app/api/filter-presets/route.js",
   "/api/users/route": "app/api/users/route.js",
-  "/api/issues/route": "app/api/issues/route.js",
   "/users/page": "app/users/page.js",
-  "/settings/page": "app/settings/page.js"
+  "/settings/page": "app/settings/page.js",
+  "/page": "app/page.js",
+  "/issues/page": "app/issues/page.js",
+  "/api/issues/route": "app/api/issues/route.js",
+  "/api/filter-presets/route": "app/api/filter-presets/route.js",
+  "/issues/[id]/page": "app/issues/[id]/page.js",
+  "/api/issues/[id]/route": "app/api/issues/[id]/route.js",
+  "/api/issues/[id]/comments/route": "app/api/issues/[id]/comments/route.js",
+  "/api/issues/[id]/assign/route": "app/api/issues/[id]/assign/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/api/dashboard/stats/route": "app/api/dashboard/stats/route.js"
 }

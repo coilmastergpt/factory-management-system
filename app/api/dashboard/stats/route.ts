@@ -2,279 +2,304 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import prisma from '../../../lib/prisma';
+import fs from 'fs';
+import path from 'path';
+
+// 데이터 파일 경로 설정
+const DATA_DIR = path.join(process.cwd(), 'data');
+const ISSUES_FILE = path.join(DATA_DIR, 'issues.json');
+
+// 이슈 인터페이스 정의
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  department: string;
+  issueType: string;
+  assignedTo: {
+    id: string;
+    name: string;
+    email: string;
+    department?: string;
+    companyId?: string;
+  } | null;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+    companyId: string;
+    department?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+}
+
+// 작업자 인터페이스 정의
+interface Worker {
+  id: string;
+  name: string;
+  companyId: string;
+  department?: string;
+}
+
+// 이슈 데이터 로드
+const loadIssues = (): Issue[] => {
+  try {
+    if (!fs.existsSync(ISSUES_FILE)) {
+      return [];
+    }
+    
+    const data = fs.readFileSync(ISSUES_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('이슈 데이터 로드 오류:', error);
+    return [];
+  }
+};
+
+// 사용자 데이터 로드 (매니저와 관리자 정보를 가져오기 위함)
+const loadUsers = (): any[] => {
+  try {
+    const usersFile = path.join(DATA_DIR, 'users.json');
+    if (!fs.existsSync(usersFile)) {
+      return [];
+    }
+    
+    const data = fs.readFileSync(usersFile, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('사용자 데이터 로드 오류:', error);
+    return [];
+  }
+};
 
 export async function GET(request: NextRequest) {
   try {
-    // 모의 대시보드 통계 데이터 생성
-    const mockStats = {
-      totalIssues: 125,
-      openIssues: 42,
-      resolvedIssues: 68,
-      criticalIssues: 15,
-      recentActivity: {
-        newIssues: 23,
-        resolvedIssues: 18,
-        percentChange: 12.5
-      },
-      byDepartment: [
-        {
-          department: '생산',
-          count: 48,
-          percentage: 38
-        },
-        {
-          department: '품질',
-          count: 32,
-          percentage: 26
-        },
-        {
-          department: '유지보수',
-          count: 28,
-          percentage: 22
-        },
-        {
-          department: '안전',
-          count: 17,
-          percentage: 14
+    // 이슈 데이터 로드
+    const issues = loadIssues();
+    
+    // URL에서 날짜 필터 파라미터 추출
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
+    
+    // 날짜 필터 추출
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const month = searchParams.get('month');
+    
+    // 날짜 필터 적용
+    let filteredIssues = [...issues];
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // 종료일의 끝으로 설정
+      
+      filteredIssues = filteredIssues.filter(issue => {
+        const createdAt = new Date(issue.createdAt);
+        return createdAt >= start && createdAt <= end;
+      });
+    } else if (month) {
+      const currentYear = new Date().getFullYear();
+      const monthIndex = parseInt(month) - 1; // JavaScript의 월은 0부터 시작
+      
+      filteredIssues = filteredIssues.filter(issue => {
+        const createdAt = new Date(issue.createdAt);
+        return createdAt.getMonth() === monthIndex;
+      });
+    }
+    
+    // 통계 계산
+    const totalIssues = filteredIssues.length;
+    const openIssues = filteredIssues.filter(issue => issue.status === 'OPEN' || issue.status === 'IN_PROGRESS').length;
+    const resolvedIssues = filteredIssues.filter(issue => issue.status === 'RESOLVED' || issue.status === 'CLOSED').length;
+    const criticalIssues = filteredIssues.filter(issue => issue.priority === 'CRITICAL').length;
+    
+    // 우선순위별 이슈 수
+    const issuesByPriority = filteredIssues.reduce((acc: Record<string, number>, issue) => {
+      acc[issue.priority] = (acc[issue.priority] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // 부서별 이슈 수
+    const issuesByDepartment = filteredIssues.reduce((acc: Record<string, number>, issue) => {
+      acc[issue.department] = (acc[issue.department] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // 일별 이슈 수 (최근 14일)
+    const today = new Date();
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(today.getDate() - 14);
+    
+    const issuesByDay: Record<string, number> = {};
+    
+    // 최근 14일 날짜 초기화
+    for (let i = 0; i < 14; i++) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      const dateString = date.toISOString().split('T')[0];
+      issuesByDay[dateString] = 0;
+    }
+    
+    // 이슈 날짜별 카운트
+    filteredIssues.forEach(issue => {
+      const createdAt = new Date(issue.createdAt);
+      if (createdAt >= twoWeeksAgo) {
+        const dateString = createdAt.toISOString().split('T')[0];
+        issuesByDay[dateString] = (issuesByDay[dateString] || 0) + 1;
+      }
+    });
+    
+    // 가장 많은 이슈를 보고한 작업자 Top 5
+    const reporterCounts: Record<string, { id: string; name: string; department: string; count: number }> = {};
+    
+    filteredIssues.forEach(issue => {
+      const reporterId = issue.createdBy.id;
+      if (!reporterCounts[reporterId]) {
+        reporterCounts[reporterId] = {
+          id: reporterId,
+          name: issue.createdBy.name,
+          department: issue.createdBy.department || '미지정',
+          count: 0
+        };
+      }
+      reporterCounts[reporterId].count++;
+    });
+    
+    const topReporters = Object.values(reporterCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(reporter => ({
+        ...reporter,
+        percentage: Math.round((reporter.count / totalIssues) * 100)
+      }));
+    
+    // 사용자 데이터 로드
+    const users = loadUsers();
+    
+    // 매니저와 관리자 ID 목록 생성
+    const managerIds = users
+      .filter(user => user.role === 'MANAGER' || user.role === 'ADMIN')
+      .map(user => user.id);
+    
+    // 가장 많은 이슈를 해결한 매니저/관리자 Top 5
+    const resolverCounts: Record<string, { id: string; name: string; department: string; count: number }> = {};
+    
+    filteredIssues
+      .filter(issue => issue.status === 'RESOLVED' || issue.status === 'CLOSED')
+      .forEach(issue => {
+        if (issue.assignedTo && managerIds.includes(issue.assignedTo.id)) {
+          const resolverId = issue.assignedTo.id;
+          if (!resolverCounts[resolverId]) {
+            // 사용자 정보에서 부서 정보 가져오기
+            const user = users.find(u => u.id === resolverId);
+            const department = user ? user.department : (issue.assignedTo.department || '미지정');
+            
+            resolverCounts[resolverId] = {
+              id: resolverId,
+              name: issue.assignedTo.name,
+              department: department,
+              count: 0
+            };
+          }
+          resolverCounts[resolverId].count++;
         }
-      ],
-      byStatus: [
-        {
-          status: 'OPEN',
-          label: '미해결',
-          count: 42,
-          percentage: 34
-        },
-        {
-          status: 'IN_PROGRESS',
-          label: '진행 중',
-          count: 15,
-          percentage: 12
-        },
-        {
-          status: 'RESOLVED',
-          label: '해결됨',
-          count: 68,
-          percentage: 54
-        }
-      ],
-      byPriority: [
-        {
-          priority: 'LOW',
-          label: '낮음',
-          count: 35,
-          percentage: 28,
-          color: 'gray'
-        },
-        {
-          priority: 'MEDIUM',
-          label: '중간',
-          count: 45,
-          percentage: 36,
-          color: 'blue'
-        },
-        {
-          priority: 'HIGH',
-          label: '높음',
-          count: 30,
-          percentage: 24,
-          color: 'orange'
-        },
-        {
-          priority: 'CRITICAL',
-          label: '긴급',
-          count: 15,
-          percentage: 12,
-          color: 'red'
-        }
-      ],
-      // 작업자별 통계 추가
-      byWorker: [
-        {
-          id: 'worker-1',
-          name: '김작업자',
-          department: '생산',
-          count: 32,
-          percentage: 26
-        },
-        {
-          id: 'worker-2',
-          name: '이엔지니어',
-          department: '품질',
-          count: 28,
-          percentage: 22
-        },
-        {
-          id: 'worker-3',
-          name: '박기술자',
-          department: '유지보수',
-          count: 25,
-          percentage: 20
-        },
-        {
-          id: 'worker-4',
-          name: '최관리자',
-          department: '안전',
-          count: 22,
-          percentage: 18
-        },
-        {
-          id: 'worker-5',
-          name: '정감독관',
-          department: '생산',
-          count: 18,
-          percentage: 14
-        }
-      ],
-      // 월별 작업자 통계 추가
-      monthlyWorkerStats: [
-        {
-          month: '1월',
-          stats: [
-            { id: 'worker-1', name: '김작업자', count: 8 },
-            { id: 'worker-2', name: '이엔지니어', count: 6 },
-            { id: 'worker-3', name: '박기술자', count: 5 },
-            { id: 'worker-4', name: '최관리자', count: 4 },
-            { id: 'worker-5', name: '정감독관', count: 3 }
-          ]
-        },
-        {
-          month: '2월',
-          stats: [
-            { id: 'worker-1', name: '김작업자', count: 7 },
-            { id: 'worker-2', name: '이엔지니어', count: 8 },
-            { id: 'worker-3', name: '박기술자', count: 6 },
-            { id: 'worker-4', name: '최관리자', count: 5 },
-            { id: 'worker-5', name: '정감독관', count: 4 }
-          ]
-        },
-        {
-          month: '3월',
-          stats: [
-            { id: 'worker-1', name: '김작업자', count: 9 },
-            { id: 'worker-2', name: '이엔지니어', count: 7 },
-            { id: 'worker-3', name: '박기술자', count: 8 },
-            { id: 'worker-4', name: '최관리자', count: 6 },
-            { id: 'worker-5', name: '정감독관', count: 5 }
-          ]
-        },
-        {
-          month: '4월',
-          stats: [
-            { id: 'worker-1', name: '김작업자', count: 8 },
-            { id: 'worker-2', name: '이엔지니어', count: 7 },
-            { id: 'worker-3', name: '박기술자', count: 6 },
-            { id: 'worker-4', name: '최관리자', count: 7 },
-            { id: 'worker-5', name: '정감독관', count: 6 }
-          ]
-        }
-      ],
-      // 이슈 유형별 통계
-      byIssueType: [
-        {
-          type: 'EQUIPMENT',
-          label: '설비 문제',
-          count: 45,
-          percentage: 36
-        },
-        {
-          type: 'MATERIAL',
-          label: '원자재 문제',
-          count: 30,
-          percentage: 24
-        },
-        {
-          type: 'WORKER',
-          label: '작업자 문제',
-          count: 25,
-          percentage: 20
-        },
-        {
-          type: 'JIG',
-          label: '지그 문제',
-          count: 15,
-          percentage: 12
-        },
-        {
-          type: 'EPOXY',
-          label: '에폭시 물성',
-          count: 10,
-          percentage: 8
-        }
-      ],
-      // 시간에 따른 이슈 추이
-      issuesTrend: [
-        { date: '2023-01-01', open: 5, resolved: 3 },
-        { date: '2023-02-01', open: 8, resolved: 4 },
-        { date: '2023-03-01', open: 12, resolved: 7 },
-        { date: '2023-04-01', open: 10, resolved: 9 },
-        { date: '2023-05-01', open: 15, resolved: 11 },
-        { date: '2023-06-01', open: 18, resolved: 14 },
-        { date: '2023-07-01', open: 14, resolved: 16 },
-        { date: '2023-08-01', open: 12, resolved: 13 },
-        { date: '2023-09-01', open: 16, resolved: 12 },
-        { date: '2023-10-01', open: 20, resolved: 15 },
-        { date: '2023-11-01', open: 18, resolved: 17 },
-        { date: '2023-12-01', open: 15, resolved: 16 }
-      ],
-      // 평균 해결 시간 (시간 단위)
-      averageResolutionTime: {
-        overall: 48,
-        byPriority: [
-          { priority: 'LOW', label: '낮음', time: 72 },
-          { priority: 'MEDIUM', label: '중간', time: 48 },
-          { priority: 'HIGH', label: '높음', time: 24 },
-          { priority: 'CRITICAL', label: '긴급', time: 12 }
-        ]
-      },
-      // 최근 추가된 이슈 목록
-      recentIssues: [
-        {
-          id: 'issue-1',
-          title: '생산라인 3 컨베이어 벨트 고장',
-          priority: 'HIGH',
-          status: 'OPEN',
-          reporter: '김작업자',
-          createdAt: '2023-12-15T09:30:00Z'
-        },
-        {
-          id: 'issue-2',
-          title: '품질검사 장비 캘리브레이션 필요',
-          priority: 'MEDIUM',
-          status: 'IN_PROGRESS',
-          reporter: '이엔지니어',
-          createdAt: '2023-12-14T14:20:00Z'
-        },
-        {
-          id: 'issue-3',
-          title: '에폭시 경화 시간 이상',
-          priority: 'CRITICAL',
-          status: 'OPEN',
-          reporter: '박기술자',
-          createdAt: '2023-12-14T11:15:00Z'
-        },
-        {
-          id: 'issue-4',
-          title: '안전 가드 파손',
-          priority: 'HIGH',
-          status: 'OPEN',
-          reporter: '최관리자',
-          createdAt: '2023-12-13T16:45:00Z'
-        },
-        {
-          id: 'issue-5',
-          title: '원자재 불량',
-          priority: 'MEDIUM',
-          status: 'RESOLVED',
-          reporter: '정감독관',
-          createdAt: '2023-12-12T10:30:00Z'
-        }
-      ]
+      });
+    
+    const topResolvers = Object.values(resolverCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(resolver => ({
+        ...resolver,
+        percentage: Math.round((resolver.count / resolvedIssues) * 100) || 0
+      }));
+    
+    // 매니저 워크로드 계산
+    const managerWorkload = topResolvers.map(resolver => {
+      // 매니저에게 할당된 모든 이슈
+      const assignedIssues = filteredIssues.filter(issue => 
+        issue.assignedTo && issue.assignedTo.id === resolver.id
+      );
+      
+      // 해결된 이슈
+      const resolvedIssues = assignedIssues.filter(issue => 
+        issue.status === 'RESOLVED' || issue.status === 'CLOSED'
+      );
+      
+      // 대기 중인 이슈 (OPEN 또는 IN_PROGRESS)
+      const pendingIssues = assignedIssues.filter(issue => 
+        issue.status === 'OPEN' || issue.status === 'IN_PROGRESS'
+      );
+      
+      return {
+        id: resolver.id,
+        name: resolver.name,
+        department: resolver.department,
+        assignedCount: assignedIssues.length,
+        resolvedCount: resolvedIssues.length,
+        pendingCount: pendingIssues.length
+      };
+    });
+    
+    // 평균 해결 시간 계산 (시간 단위)
+    let totalResolutionTime = 0;
+    let resolvedCount = 0;
+    
+    filteredIssues
+      .filter(issue => issue.resolvedAt)
+      .forEach(issue => {
+        const createdAt = new Date(issue.createdAt).getTime();
+        const resolvedAt = new Date(issue.resolvedAt as string).getTime();
+        const resolutionTime = (resolvedAt - createdAt) / (1000 * 60 * 60); // 시간 단위로 변환
+        totalResolutionTime += resolutionTime;
+        resolvedCount++;
+      });
+    
+    const averageResolutionTime = resolvedCount > 0 
+      ? Math.round(totalResolutionTime / resolvedCount) 
+      : 0;
+    
+    // 최근 중요 이슈 (우선순위가 높거나 긴급한 이슈)
+    const recentImportantIssues = filteredIssues
+      .filter(issue => issue.priority === 'HIGH' || issue.priority === 'CRITICAL')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        priority: issue.priority,
+        status: issue.status,
+        department: issue.department,
+        createdAt: issue.createdAt,
+        assignedTo: issue.assignedTo ? issue.assignedTo.name : '미배정'
+      }));
+    
+    // 응답 데이터 구성
+    const response = {
+      totalIssues,
+      openIssues,
+      resolvedIssues,
+      criticalIssues,
+      issuesByPriority,
+      issuesByDepartment,
+      issuesByDay,
+      topReporters,
+      topResolvers,
+      averageResolutionTime,
+      recentImportantIssues,
+      managerWorkload
     };
     
-    return NextResponse.json(mockStats);
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('대시보드 통계 조회 중 오류 발생:', error);
-    return NextResponse.json({ error: '대시보드 통계 조회 중 오류가 발생했습니다.' }, { status: 500 });
+    console.error('대시보드 통계 계산 중 오류 발생:', error);
+    return NextResponse.json(
+      { error: '대시보드 통계를 계산하는 중 오류가 발생했습니다.' },
+      { status: 500 }
+    );
   }
 } 

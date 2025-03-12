@@ -117,6 +117,7 @@ export default function SettingsPage() {
     department: '',
   });
   const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
+  const [allWorkers, setAllWorkers] = useState<Worker[]>([]); // 모든 작업자 목록 (사용자 포함)
   
   // 문제 유형 상태
   const [issueTypes, setIssueTypes] = useState<IssueType[]>([]);
@@ -185,15 +186,70 @@ export default function SettingsPage() {
     }
   };
   
+  // 모든 작업자 데이터 로딩 (사용자 포함)
+  const fetchAllWorkers = async () => {
+    try {
+      // 설정의 작업자 데이터
+      const settingsResponse = await fetch('/api/settings?type=workers');
+      const settingsWorkers = await settingsResponse.json();
+      
+      // 사용자 데이터
+      const usersResponse = await fetch('/api/users');
+      const users = await usersResponse.json();
+      
+      // 두 데이터 합치기
+      const combinedWorkers = [
+        ...settingsWorkers,
+        ...users.map((user: any) => ({
+          id: user.id,
+          name: user.name,
+          companyId: user.companyId || '',
+          email: user.email,
+          department: user.department,
+          role: user.role
+        }))
+      ];
+      
+      // 중복 제거 (companyId 기준)
+      const uniqueWorkers = combinedWorkers.filter((worker, index, self) => 
+        worker.companyId && 
+        self.findIndex(w => w.companyId === worker.companyId) === index
+      );
+      
+      setAllWorkers(uniqueWorkers);
+    } catch (error) {
+      console.error('모든 작업자 데이터 로딩 오류:', error);
+    }
+  };
+  
   // 데이터 로딩
   useEffect(() => {
     fetchSettings();
+    fetchAllWorkers(); // 모든 작업자 데이터 로딩
   }, []);
-  
+
+  // URL 파라미터에 따라 탭 선택
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      
+      if (tab === 'workers') {
+        setActiveTab(3); // 작업자 관리 탭 인덱스
+      }
+    }
+  }, []);
+
   // 권한 체크 - 조건부 훅 사용 제거
   useEffect(() => {
     console.log('현재 사용자 정보:', user);
     console.log('사용자 역할:', user?.role);
+    console.log('로딩 상태:', isLoading);
+    
+    // 로딩 중일 때는 체크하지 않음
+    if (isLoading) {
+      return;
+    }
     
     if (!user) {
       toast({
@@ -219,10 +275,10 @@ export default function SettingsPage() {
       });
       router.push('/');
     }
-  }, [user, router, toast]);
+  }, [user, router, toast, isLoading]);
 
-  // 로딩 중이거나 권한이 없는 경우 표시
-  if (loading) {
+  // 로딩 중인 경우 표시
+  if (isLoading || loading) {
     return (
       <Center h="100vh">
         <Spinner size="xl" />
@@ -578,32 +634,52 @@ export default function SettingsPage() {
   
   // 설정 페이지 내부에서 관리자와 매니저의 권한 구분
   const isAdmin = user?.role === 'ADMIN';
+  const isManager = user?.role === 'MANAGER';
 
-  // 탭 변경 핸들러에 권한 체크 추가
+  // 탭 변경 핸들러
   const handleTabChange = (index: number) => {
-    // 매니저는 사용자 관리 탭(인덱스 3)에 접근할 수 없음
-    if (!isAdmin && index === 3) {
-      toast({
-        title: '접근 권한 없음',
-        description: '사용자 관리 탭은 관리자만 접근할 수 있습니다.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
     setActiveTab(index);
   };
   
-  if (loading) {
-    return (
-      <Container maxW="container.xl" py={8}>
-        <Center h="50vh">
-          <Spinner size="xl" />
-        </Center>
-      </Container>
-    );
-  }
+  // 직원 ID로 이름 찾기
+  const findWorkerNameById = (companyId: string) => {
+    const worker = allWorkers.find(w => w.companyId === companyId);
+    return worker ? worker.name : '';
+  };
+
+  // 이름으로 직원 ID 찾기
+  const findWorkerIdByName = (name: string) => {
+    const worker = allWorkers.find(w => w.name === name);
+    return worker ? worker.companyId : '';
+  };
+
+  // 직원 ID 변경 시 이름 자동 설정
+  const handleCompanyIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const companyId = e.target.value;
+    setNewWorker({...newWorker, companyId});
+    
+    // 직원 ID로 이름 찾기
+    if (companyId) {
+      const name = findWorkerNameById(companyId);
+      if (name && name !== newWorker.name) {
+        setNewWorker(prev => ({...prev, name}));
+      }
+    }
+  };
+
+  // 이름 변경 시 직원 ID 자동 설정
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setNewWorker({...newWorker, name});
+    
+    // 이름으로 직원 ID 찾기
+    if (name && !newWorker.companyId) {
+      const companyId = findWorkerIdByName(name);
+      if (companyId) {
+        setNewWorker(prev => ({...prev, companyId}));
+      }
+    }
+  };
   
   return (
     <Container maxW="container.xl" py={8}>
@@ -614,11 +690,9 @@ export default function SettingsPage() {
         <Badge colorScheme={isAdmin ? 'red' : 'green'} fontSize="sm" p={1}>
           {isAdmin ? '관리자 권한' : '매니저 권한'}
         </Badge>
-        {!isAdmin && (
-          <Text fontSize="sm" color="gray.500" mt={1}>
-            일부 설정은 관리자만 변경할 수 있습니다.
-          </Text>
-        )}
+        <Text fontSize="sm" color="gray.500" mt={1}>
+          모든 설정을 변경할 수 있습니다.
+        </Text>
       </Box>
 
       <Tabs index={activeTab} onChange={handleTabChange} variant="enclosed">
@@ -626,7 +700,7 @@ export default function SettingsPage() {
           <Tab>우선순위 관리</Tab>
           <Tab>부서 관리</Tab>
           <Tab>문제 유형 관리</Tab>
-          <Tab isDisabled={!isAdmin}>작업자 관리</Tab>
+          <Tab>작업자 관리</Tab>
         </TabList>
         
         <TabPanels>
@@ -779,63 +853,53 @@ export default function SettingsPage() {
           
           {/* 작업자 관리 - 관리자만 접근 가능 */}
           <TabPanel>
-            {isAdmin ? (
-              <Flex justifyContent="space-between" mb={4}>
-                <Heading size="md">작업자 목록</Heading>
-                <Button leftIcon={<AddIcon />} colorScheme="blue" onClick={openNewWorkerModal}>
-                  새 작업자
-                </Button>
-              </Flex>
-            ) : (
-              <Alert status="warning">
-                <AlertIcon />
-                <AlertTitle>접근 권한 없음</AlertTitle>
-                <AlertDescription>작업자 관리는 관리자만 접근할 수 있습니다.</AlertDescription>
-              </Alert>
-            )}
+            <Flex justifyContent="space-between" mb={4}>
+              <Heading size="md">작업자 목록</Heading>
+              <Button leftIcon={<AddIcon />} colorScheme="blue" onClick={openNewWorkerModal}>
+                새 작업자
+              </Button>
+            </Flex>
             
-            {isAdmin && (
-              <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-                <Table variant="simple">
-                  <Thead bg="gray.50">
-                    <Tr>
-                      <Th>이름</Th>
-                      <Th>회사 ID</Th>
-                      <Th>이메일</Th>
-                      <Th>부서</Th>
-                      <Th width="100px">작업</Th>
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+              <Table variant="simple">
+                <Thead bg="gray.50">
+                  <Tr>
+                    <Th>이름</Th>
+                    <Th>직원 ID</Th>
+                    <Th>이메일</Th>
+                    <Th>부서</Th>
+                    <Th width="100px">작업</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {workers.map((worker) => (
+                    <Tr key={worker.id}>
+                      <Td>{worker.name}</Td>
+                      <Td>{worker.companyId}</Td>
+                      <Td>{worker.email}</Td>
+                      <Td>{worker.department}</Td>
+                      <Td>
+                        <HStack spacing={2}>
+                          <IconButton
+                            aria-label="수정"
+                            icon={<EditIcon />}
+                            size="sm"
+                            onClick={() => openEditWorkerModal(worker)}
+                          />
+                          <IconButton
+                            aria-label="삭제"
+                            icon={<DeleteIcon />}
+                            size="sm"
+                            colorScheme="red"
+                            onClick={() => openDeleteAlert('workers', worker.id)}
+                          />
+                        </HStack>
+                      </Td>
                     </Tr>
-                  </Thead>
-                  <Tbody>
-                    {workers.map((worker) => (
-                      <Tr key={worker.id}>
-                        <Td>{worker.name}</Td>
-                        <Td>{worker.companyId}</Td>
-                        <Td>{worker.email}</Td>
-                        <Td>{worker.department}</Td>
-                        <Td>
-                          <HStack spacing={2}>
-                            <IconButton
-                              aria-label="수정"
-                              icon={<EditIcon />}
-                              size="sm"
-                              onClick={() => openEditWorkerModal(worker)}
-                            />
-                            <IconButton
-                              aria-label="삭제"
-                              icon={<DeleteIcon />}
-                              size="sm"
-                              colorScheme="red"
-                              onClick={() => openDeleteAlert('workers', worker.id)}
-                            />
-                          </HStack>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-            )}
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -960,16 +1024,16 @@ export default function SettingsPage() {
                 <Input 
                   placeholder="작업자 이름" 
                   value={newWorker.name}
-                  onChange={(e) => setNewWorker({...newWorker, name: e.target.value})}
+                  onChange={handleNameChange}
                 />
               </FormControl>
               
               <FormControl isRequired>
-                <FormLabel>회사 ID</FormLabel>
+                <FormLabel>직원 ID</FormLabel>
                 <Input 
-                  placeholder="회사 ID" 
+                  placeholder="직원 ID" 
                   value={newWorker.companyId}
-                  onChange={(e) => setNewWorker({...newWorker, companyId: e.target.value})}
+                  onChange={handleCompanyIdChange}
                 />
               </FormControl>
               

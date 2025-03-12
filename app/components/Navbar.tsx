@@ -60,7 +60,7 @@ export default function Navbar() {
             공장관리시스템
           </Text>
           <HStack as="nav" spacing={4}>
-            <NavLink href="/" icon={<HiHome />}>
+            <NavLink href="/dashboard" icon={<HiHome />}>
               대시보드
             </NavLink>
             <NavLink href="/issues" icon={<HiClipboardList />}>

@@ -46,6 +46,8 @@ import {
   Spacer,
   Stack,
   Icon,
+  ModalFooter,
+  FormHelperText,
 } from '@chakra-ui/react';
 import { SearchIcon, TriangleDownIcon, TriangleUpIcon, DownloadIcon } from '@chakra-ui/icons';
 import CreateUserForm from '../components/CreateUserForm';
@@ -63,10 +65,10 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: keyof typeof roleColors;
+  role: 'ADMIN' | 'MANAGER' | 'WORKER';
   department: string;
-  companyId: string;
   createdAt: string;
+  companyId?: string;
 }
 
 interface Department {
@@ -93,6 +95,7 @@ export default function UsersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  const [allUsers, setAllUsers] = useState<User[]>([]); // 모든 사용자 목록 (작업자 포함)
 
   // 사용자 삭제 확인 모달 상태
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -182,9 +185,46 @@ export default function UsersPage() {
     }
   };
 
+  // 모든 사용자 데이터 로딩 (작업자 포함)
+  const fetchAllUsers = async () => {
+    try {
+      // 관리자 데이터
+      const usersResponse = await fetch('/api/users');
+      const users = await usersResponse.json();
+      
+      // 작업자 데이터
+      const workersResponse = await fetch('/api/settings?type=workers');
+      const workers = await workersResponse.json();
+      
+      // 두 데이터 합치기
+      const combinedUsers = [
+        ...users,
+        ...workers.map((worker: any) => ({
+          id: worker.id,
+          name: worker.name,
+          companyId: worker.companyId || '',
+          email: worker.email,
+          department: worker.department,
+          role: worker.role
+        }))
+      ];
+      
+      // 중복 제거 (companyId 기준)
+      const uniqueUsers = combinedUsers.filter((user, index, self) => 
+        user.companyId && 
+        self.findIndex(u => u.companyId === user.companyId) === index
+      );
+      
+      setAllUsers(uniqueUsers);
+    } catch (error) {
+      console.error('모든 사용자 데이터 로딩 오류:', error);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
     fetchDepartments();
+    fetchAllUsers(); // 모든 사용자 데이터 로딩
   }, []);
 
   // 검색어에 따라 사용자 필터링
@@ -308,9 +348,44 @@ export default function UsersPage() {
   // 사용자 수정 처리
   const handleEditUser = async () => {
     if (!editingUser) return;
-
+    
+    // 직원 ID가 작업자 관리에 등록되어 있는지 확인
+    const isWorkerRegistered = allUsers.some(user => user.companyId === editingUser.companyId);
+    
+    if (!isWorkerRegistered) {
+      toast({
+        title: '등록되지 않은 직원 ID',
+        description: '해당 직원 ID는 작업자 관리에 등록되어 있지 않습니다. 먼저 설정의 작업자 관리에서 등록해주세요.',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+        render: ({ onClose }) => (
+          <Box p={3} bg="orange.100" borderRadius="md" color="orange.800">
+            <VStack align="start" spacing={2}>
+              <Text fontWeight="bold">등록되지 않은 직원 ID</Text>
+              <Text>해당 직원 ID는 작업자 관리에 등록되어 있지 않습니다.</Text>
+              <HStack spacing={2} mt={2}>
+                <Button size="sm" colorScheme="orange" onClick={() => {
+                  onClose();
+                  setIsEditModalOpen(false);
+                  router.push('/settings?tab=workers');
+                }}>
+                  작업자 관리로 이동
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onClose}>
+                  닫기
+                </Button>
+              </HStack>
+            </VStack>
+          </Box>
+        )
+      });
+      return;
+    }
+    
+    setIsEditSubmitting(true);
+    
     try {
-      setIsEditSubmitting(true);
       const response = await fetch(`/api/users/${editingUser.id}`, {
         method: 'PUT',
         headers: {
@@ -318,26 +393,25 @@ export default function UsersPage() {
         },
         body: JSON.stringify(editingUser),
       });
-
+      
       if (!response.ok) {
-        throw new Error('관리자 정보 수정에 실패했습니다.');
+        throw new Error('사용자 정보 수정에 실패했습니다.');
       }
-
+      
       toast({
-        title: '관리자 정보가 수정되었습니다.',
+        title: '사용자 정보가 수정되었습니다.',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-
-      // 사용자 목록 다시 불러오기
+      
+      // 사용자 목록 새로고침
       loadUsers();
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error('관리자 수정 오류:', error);
       toast({
-        title: '관리자 정보 수정 실패',
-        description: '관리자 정보를 수정하는 중 오류가 발생했습니다.',
+        title: '사용자 정보 수정 실패',
+        description: '사용자 정보를 수정하는 중 오류가 발생했습니다.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -383,8 +457,8 @@ export default function UsersPage() {
           valueB = b.department.toLowerCase();
           break;
         case 'companyId':
-          valueA = a.companyId.toLowerCase();
-          valueB = b.companyId.toLowerCase();
+          valueA = a.companyId?.toLowerCase() || '';
+          valueB = b.companyId?.toLowerCase() || '';
           break;
         case 'createdAt':
           valueA = new Date(a.createdAt).getTime();
@@ -470,6 +544,46 @@ export default function UsersPage() {
       duration: 3000,
       isClosable: true,
     });
+  };
+
+  // 직원 ID로 이름 찾기
+  const findUserNameById = (companyId: string) => {
+    const user = allUsers.find(u => u.companyId === companyId);
+    return user ? user.name : '';
+  };
+
+  // 이름으로 직원 ID 찾기
+  const findUserIdByName = (name: string) => {
+    const user = allUsers.find(u => u.name === name);
+    return user ? user.companyId : '';
+  };
+
+  // 직원 ID 변경 시 이름 자동 설정
+  const handleCompanyIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const companyId = e.target.value;
+    setEditingUser({...editingUser!, companyId});
+    
+    // 직원 ID로 이름 찾기
+    if (companyId && editingUser) {
+      const name = findUserNameById(companyId);
+      if (name && name !== editingUser.name) {
+        setEditingUser(prev => ({...prev!, name}));
+      }
+    }
+  };
+
+  // 이름 변경 시 직원 ID 자동 설정
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setEditingUser({...editingUser!, name});
+    
+    // 이름으로 직원 ID 찾기
+    if (name && editingUser && !editingUser.companyId) {
+      const companyId = findUserIdByName(name);
+      if (companyId) {
+        setEditingUser(prev => ({...prev!, companyId}));
+      }
+    }
   };
 
   // 로딩 중이거나 권한이 없는 경우 표시
@@ -661,7 +775,7 @@ export default function UsersPage() {
           <ModalHeader>새 사용자 등록</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <CreateUserForm onSuccess={handleUserCreated} />
+            <CreateUserForm onUserCreated={handleUserCreated} />
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -672,77 +786,72 @@ export default function UsersPage() {
         <ModalContent>
           <ModalHeader>관리자 정보 수정</ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6}>
-            {editingUser && (
-              <Box as="form" p={6} bg="white" borderRadius="lg" shadow="md">
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>이름</FormLabel>
-                    <Input
-                      value={editingUser.name}
-                      onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
-                      placeholder="사용자 이름"
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>이메일</FormLabel>
-                    <Input
-                      type="email"
-                      value={editingUser.email}
-                      onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
-                      placeholder="example@factory.com"
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>역할</FormLabel>
-                    <Select 
-                      value={editingUser.role}
-                      onChange={(e) => setEditingUser({...editingUser, role: e.target.value as keyof typeof roleColors})}
-                    >
-                      <option value="WORKER">일반 사용자</option>
-                      <option value="MANAGER">매니저</option>
-                      <option value="ADMIN">관리자</option>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>부서</FormLabel>
-                    <Select
-                      value={editingUser.department}
-                      onChange={(e) => setEditingUser({...editingUser, department: e.target.value})}
-                      placeholder="부서 선택"
-                    >
-                      {departments.map((dept) => (
-                        <option key={dept.id} value={dept.value}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>직원 ID</FormLabel>
-                    <Input
-                      value={editingUser.companyId}
-                      onChange={(e) => setEditingUser({...editingUser, companyId: e.target.value})}
-                      placeholder="직원 ID (예: EMP001)"
-                    />
-                  </FormControl>
-
-                  <Button
-                    colorScheme="blue"
-                    width="full"
-                    onClick={handleEditUser}
-                    isLoading={isEditSubmitting}
-                  >
-                    저장
-                  </Button>
-                </VStack>
-              </Box>
-            )}
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>이름</FormLabel>
+                <Input 
+                  value={editingUser?.name || ''}
+                  onChange={handleNameChange}
+                />
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>이메일</FormLabel>
+                <Input 
+                  type="email"
+                  value={editingUser?.email || ''}
+                  onChange={(e) => setEditingUser({...editingUser!, email: e.target.value})}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>직원 ID</FormLabel>
+                <Input 
+                  value={editingUser?.companyId || ''}
+                  onChange={handleCompanyIdChange}
+                  placeholder="직원 ID를 입력하세요"
+                />
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>역할</FormLabel>
+                <Select 
+                  value={editingUser?.role || ''}
+                  onChange={(e) => setEditingUser({...editingUser!, role: e.target.value as 'ADMIN' | 'MANAGER' | 'WORKER'})}
+                >
+                  <option value="ADMIN">관리자</option>
+                  <option value="MANAGER">매니저</option>
+                </Select>
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>부서</FormLabel>
+                <Select 
+                  value={editingUser?.department || ''}
+                  onChange={(e) => setEditingUser({...editingUser!, department: e.target.value})}
+                >
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.value}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+            </VStack>
           </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => setIsEditModalOpen(false)}>
+              취소
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleEditUser}
+              isLoading={isEditSubmitting}
+            >
+              저장
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
       
