@@ -1,0 +1,142 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          UserRole  @default(WORKER)
+  department    String
+  createdIssues Issue[]   @relation("CreatedIssues")
+  solvedIssues  Issue[]   @relation("SolvedIssues")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  filterPresets FilterPreset[]
+  dashboardSettings Json?
+  comments      Comment[]
+  notifications Notification[]
+}
+
+model Issue {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  status      IssueStatus @default(OPEN)
+  priority    Priority    @default(MEDIUM)
+  category    String
+  location    String
+  reporter    User        @relation("CreatedIssues", fields: [reporterId], references: [id])
+  reporterId  String
+  solver      User?       @relation("SolvedIssues", fields: [solverId], references: [id])
+  solverId    String?
+  solution    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  resolvedAt  DateTime?
+  comments    Comment[]
+  notifications Notification[]
+  attachments IssueAttachment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  issueId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  parentComment   Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId        String?
+  replies         Comment[] @relation("Replies")
+  notifications   Notification[]
+
+  @@index([issueId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      NotificationType
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  issue   Issue?  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  issueId String?
+
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
+
+  @@index([userId])
+  @@index([issueId])
+  @@index([commentId])
+}
+
+model IssueAttachment {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  createdAt DateTime @default(now())
+  
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  issueId   String
+
+  @@index([issueId])
+}
+
+model FilterPreset {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  filters     Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  WORKER
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationType {
+  ISSUE_ASSIGNED
+  ISSUE_RESOLVED
+  COMMENT_ADDED
+  COMMENT_REPLIED
+} 

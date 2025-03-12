@@ -1,0 +1,1177 @@
+[
+  {
+    "id": "issue-1",
+    "title": "이슈 1: 안전 부서 문제",
+    "description": "이슈 1에 대한 상세 설명입니다. 이 문제는 2/11/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "LOW",
+    "department": "유지보수",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-02-11T06:16:39.227Z",
+    "updatedAt": "2025-02-11T06:16:39.227Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-2",
+    "title": "이슈 2: 품질 부서 문제",
+    "description": "이슈 2에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "MEDIUM",
+    "department": "품질",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-21T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-3",
+    "title": "이슈 3: 생산 부서 문제",
+    "description": "이슈 3에 대한 상세 설명입니다. 이 문제는 2/28/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-28T06:16:39.233Z",
+    "updatedAt": "2025-02-28T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-4",
+    "title": "이슈 4: 생산 부서 문제",
+    "description": "이슈 4에 대한 상세 설명입니다. 이 문제는 2/13/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "HIGH",
+    "department": "품질",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-13T06:16:39.233Z",
+    "updatedAt": "2025-02-17T06:16:39.233Z",
+    "resolvedAt": "2025-02-18T06:16:39.233Z",
+    "solution": "이슈 4에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-5",
+    "title": "이슈 5: 품질 부서 문제",
+    "description": "이슈 5에 대한 상세 설명입니다. 이 문제는 3/5/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "LOW",
+    "department": "생산",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-03-05T06:16:39.233Z",
+    "updatedAt": "2025-03-05T06:16:39.233Z",
+    "resolvedAt": "2025-03-07T06:16:39.233Z",
+    "solution": "이슈 5에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-6",
+    "title": "이슈 6: 생산 부서 문제",
+    "description": "이슈 6에 대한 상세 설명입니다. 이 문제는 3/11/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "생산",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-03-11T06:16:39.233Z",
+    "updatedAt": "2025-03-12T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-7",
+    "title": "이슈 7: 유지보수 부서 문제",
+    "description": "이슈 7에 대한 상세 설명입니다. 이 문제는 3/11/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "MEDIUM",
+    "department": "안전",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-03-11T06:16:39.233Z",
+    "updatedAt": "2025-03-13T06:16:39.233Z",
+    "resolvedAt": "2025-03-16T06:16:39.233Z",
+    "solution": "이슈 7에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-8",
+    "title": "이슈 8: 유지보수 부서 문제",
+    "description": "이슈 8에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "department": "유지보수",
+    "issueType": "원자재 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-21T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-9",
+    "title": "이슈 9: 안전 부서 문제",
+    "description": "이슈 9에 대한 상세 설명입니다. 이 문제는 3/3/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "LOW",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-03-03T06:16:39.233Z",
+    "updatedAt": "2025-03-04T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-10",
+    "title": "이슈 10: 생산 부서 문제",
+    "description": "이슈 10에 대한 상세 설명입니다. 이 문제는 3/11/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "안전",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-03-11T06:16:39.233Z",
+    "updatedAt": "2025-03-14T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-11",
+    "title": "이슈 11: 생산 부서 문제",
+    "description": "이슈 11에 대한 상세 설명입니다. 이 문제는 3/6/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "생산",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-03-06T06:16:39.233Z",
+    "updatedAt": "2025-03-09T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-12",
+    "title": "이슈 12: 유지보수 부서 문제",
+    "description": "이슈 12에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "department": "안전",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-21T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-13",
+    "title": "이슈 13: 안전 부서 문제",
+    "description": "이슈 13에 대한 상세 설명입니다. 이 문제는 3/4/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "department": "유지보수",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-03-04T06:16:39.233Z",
+    "updatedAt": "2025-03-07T06:16:39.233Z",
+    "resolvedAt": "2025-03-09T06:16:39.233Z",
+    "solution": "이슈 13에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-14",
+    "title": "이슈 14: 품질 부서 문제",
+    "description": "이슈 14에 대한 상세 설명입니다. 이 문제는 2/25/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "작업자 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-25T06:16:39.233Z",
+    "updatedAt": "2025-02-27T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-15",
+    "title": "이슈 15: 생산 부서 문제",
+    "description": "이슈 15에 대한 상세 설명입니다. 이 문제는 3/5/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-03-05T06:16:39.233Z",
+    "updatedAt": "2025-03-07T06:16:39.233Z",
+    "resolvedAt": "2025-03-10T06:16:39.233Z",
+    "solution": "이슈 15에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-16",
+    "title": "이슈 16: 안전 부서 문제",
+    "description": "이슈 16에 대한 상세 설명입니다. 이 문제는 3/7/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "department": "품질",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-03-07T06:16:39.233Z",
+    "updatedAt": "2025-03-09T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-17",
+    "title": "이슈 17: 유지보수 부서 문제",
+    "description": "이슈 17에 대한 상세 설명입니다. 이 문제는 2/14/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-14T06:16:39.233Z",
+    "updatedAt": "2025-02-17T06:16:39.233Z",
+    "resolvedAt": "2025-02-19T06:16:39.233Z",
+    "solution": "이슈 17에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-18",
+    "title": "이슈 18: 안전 부서 문제",
+    "description": "이슈 18에 대한 상세 설명입니다. 이 문제는 2/16/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "LOW",
+    "department": "생산",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-16T06:16:39.233Z",
+    "updatedAt": "2025-02-18T06:16:39.233Z",
+    "resolvedAt": "2025-02-21T06:16:39.233Z",
+    "solution": "이슈 18에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-19",
+    "title": "이슈 19: 유지보수 부서 문제",
+    "description": "이슈 19에 대한 상세 설명입니다. 이 문제는 2/18/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "유지보수",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-18T06:16:39.233Z",
+    "updatedAt": "2025-02-20T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-20",
+    "title": "이슈 20: 안전 부서 문제",
+    "description": "이슈 20에 대한 상세 설명입니다. 이 문제는 2/11/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-11T06:16:39.233Z",
+    "updatedAt": "2025-02-11T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-21",
+    "title": "이슈 21: 생산 부서 문제",
+    "description": "이슈 21에 대한 상세 설명입니다. 이 문제는 2/15/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "department": "품질",
+    "issueType": "지그 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-15T06:16:39.233Z",
+    "updatedAt": "2025-02-18T06:16:39.233Z",
+    "resolvedAt": "2025-02-21T06:16:39.233Z",
+    "solution": "이슈 21에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-22",
+    "title": "이슈 22: 생산 부서 문제",
+    "description": "이슈 22에 대한 상세 설명입니다. 이 문제는 2/13/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "department": "생산",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-13T06:16:39.233Z",
+    "updatedAt": "2025-02-17T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-23",
+    "title": "이슈 23: 유지보수 부서 문제",
+    "description": "이슈 23에 대한 상세 설명입니다. 이 문제는 2/23/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "HIGH",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-23T06:16:39.233Z",
+    "updatedAt": "2025-02-24T06:16:39.233Z",
+    "resolvedAt": "2025-02-26T06:16:39.233Z",
+    "solution": "이슈 23에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-24",
+    "title": "이슈 24: 유지보수 부서 문제",
+    "description": "이슈 24에 대한 상세 설명입니다. 이 문제는 3/11/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "department": "안전",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-03-11T06:16:39.233Z",
+    "updatedAt": "2025-03-14T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-25",
+    "title": "이슈 25: 유지보수 부서 문제",
+    "description": "이슈 25에 대한 상세 설명입니다. 이 문제는 3/9/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "department": "품질",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-03-09T06:16:39.233Z",
+    "updatedAt": "2025-03-09T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-26",
+    "title": "이슈 26: 유지보수 부서 문제",
+    "description": "이슈 26에 대한 상세 설명입니다. 이 문제는 2/17/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-17T06:16:39.233Z",
+    "updatedAt": "2025-02-21T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-27",
+    "title": "이슈 27: 안전 부서 문제",
+    "description": "이슈 27에 대한 상세 설명입니다. 이 문제는 2/28/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-28T06:16:39.233Z",
+    "updatedAt": "2025-03-02T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-28",
+    "title": "이슈 28: 생산 부서 문제",
+    "description": "이슈 28에 대한 상세 설명입니다. 이 문제는 2/23/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "유지보수",
+    "issueType": "지그 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-02-23T06:16:39.233Z",
+    "updatedAt": "2025-02-25T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-29",
+    "title": "이슈 29: 품질 부서 문제",
+    "description": "이슈 29에 대한 상세 설명입니다. 이 문제는 2/22/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "LOW",
+    "department": "품질",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-02-22T06:16:39.233Z",
+    "updatedAt": "2025-02-25T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-30",
+    "title": "이슈 30: 생산 부서 문제",
+    "description": "이슈 30에 대한 상세 설명입니다. 이 문제는 3/4/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-03-04T06:16:39.233Z",
+    "updatedAt": "2025-03-06T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-31",
+    "title": "이슈 31: 품질 부서 문제",
+    "description": "이슈 31에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "department": "생산",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-24T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-32",
+    "title": "이슈 32: 품질 부서 문제",
+    "description": "이슈 32에 대한 상세 설명입니다. 이 문제는 2/16/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "department": "품질",
+    "issueType": "설비 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-16T06:16:39.233Z",
+    "updatedAt": "2025-02-20T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-33",
+    "title": "이슈 33: 안전 부서 문제",
+    "description": "이슈 33에 대한 상세 설명입니다. 이 문제는 2/27/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-27T06:16:39.233Z",
+    "updatedAt": "2025-03-03T06:16:39.233Z",
+    "resolvedAt": "2025-03-05T06:16:39.233Z",
+    "solution": "이슈 33에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-34",
+    "title": "이슈 34: 안전 부서 문제",
+    "description": "이슈 34에 대한 상세 설명입니다. 이 문제는 3/2/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-03-02T06:16:39.233Z",
+    "updatedAt": "2025-03-06T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-35",
+    "title": "이슈 35: 유지보수 부서 문제",
+    "description": "이슈 35에 대한 상세 설명입니다. 이 문제는 2/11/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "LOW",
+    "department": "품질",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-11T06:16:39.233Z",
+    "updatedAt": "2025-02-11T06:16:39.233Z",
+    "resolvedAt": "2025-02-12T06:16:39.233Z",
+    "solution": "이슈 35에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-36",
+    "title": "이슈 36: 생산 부서 문제",
+    "description": "이슈 36에 대한 상세 설명입니다. 이 문제는 2/15/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "department": "안전",
+    "issueType": "작업자 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-15T06:16:39.233Z",
+    "updatedAt": "2025-02-16T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-37",
+    "title": "이슈 37: 생산 부서 문제",
+    "description": "이슈 37에 대한 상세 설명입니다. 이 문제는 3/10/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "department": "생산",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-03-10T06:16:39.233Z",
+    "updatedAt": "2025-03-11T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-38",
+    "title": "이슈 38: 안전 부서 문제",
+    "description": "이슈 38에 대한 상세 설명입니다. 이 문제는 2/15/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-02-15T06:16:39.233Z",
+    "updatedAt": "2025-02-18T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-39",
+    "title": "이슈 39: 안전 부서 문제",
+    "description": "이슈 39에 대한 상세 설명입니다. 이 문제는 2/23/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "CRITICAL",
+    "department": "유지보수",
+    "issueType": "작업자 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-23T06:16:39.233Z",
+    "updatedAt": "2025-02-27T06:16:39.233Z",
+    "resolvedAt": "2025-02-28T06:16:39.233Z",
+    "solution": "이슈 39에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-40",
+    "title": "이슈 40: 안전 부서 문제",
+    "description": "이슈 40에 대한 상세 설명입니다. 이 문제는 3/8/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "LOW",
+    "department": "안전",
+    "issueType": "작업자 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-03-08T06:16:39.233Z",
+    "updatedAt": "2025-03-10T06:16:39.233Z",
+    "resolvedAt": "2025-03-13T06:16:39.233Z",
+    "solution": "이슈 40에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-41",
+    "title": "이슈 41: 유지보수 부서 문제",
+    "description": "이슈 41에 대한 상세 설명입니다. 이 문제는 2/23/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "MEDIUM",
+    "department": "생산",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-23T06:16:39.233Z",
+    "updatedAt": "2025-02-24T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-42",
+    "title": "이슈 42: 생산 부서 문제",
+    "description": "이슈 42에 대한 상세 설명입니다. 이 문제는 2/26/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "LOW",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-02-26T06:16:39.233Z",
+    "updatedAt": "2025-02-26T06:16:39.233Z",
+    "resolvedAt": "2025-02-27T06:16:39.233Z",
+    "solution": "이슈 42에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-43",
+    "title": "이슈 43: 안전 부서 문제",
+    "description": "이슈 43에 대한 상세 설명입니다. 이 문제는 2/26/2025에 발생했습니다.",
+    "status": "CLOSED",
+    "priority": "MEDIUM",
+    "department": "품질",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdBy": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdAt": "2025-02-26T06:16:39.233Z",
+    "updatedAt": "2025-02-26T06:16:39.233Z",
+    "resolvedAt": "2025-03-01T06:16:39.233Z",
+    "solution": "이슈 43에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-44",
+    "title": "이슈 44: 생산 부서 문제",
+    "description": "이슈 44에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-3",
+      "name": "박기술자",
+      "email": "park@example.com",
+      "companyId": "EMP003"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-22T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-45",
+    "title": "이슈 45: 유지보수 부서 문제",
+    "description": "이슈 45에 대한 상세 설명입니다. 이 문제는 2/28/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "작업자 문제",
+    "assignedTo": null,
+    "createdBy": {
+      "id": "worker-1",
+      "name": "김작업자",
+      "email": "kim@example.com",
+      "companyId": "EMP001"
+    },
+    "createdAt": "2025-02-28T06:16:39.233Z",
+    "updatedAt": "2025-03-03T06:16:39.233Z",
+    "resolvedAt": "2025-03-04T06:16:39.233Z",
+    "solution": "이슈 45에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-46",
+    "title": "이슈 46: 품질 부서 문제",
+    "description": "이슈 46에 대한 상세 설명입니다. 이 문제는 3/2/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-03-02T06:16:39.233Z",
+    "updatedAt": "2025-03-03T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-47",
+    "title": "이슈 47: 품질 부서 문제",
+    "description": "이슈 47에 대한 상세 설명입니다. 이 문제는 3/11/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "department": "유지보수",
+    "issueType": "설비 문제",
+    "assignedTo": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdBy": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdAt": "2025-03-11T06:16:39.233Z",
+    "updatedAt": "2025-03-13T06:16:39.233Z",
+    "resolvedAt": "2025-03-15T06:16:39.233Z",
+    "solution": "이슈 47에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-48",
+    "title": "이슈 48: 생산 부서 문제",
+    "description": "이슈 48에 대한 상세 설명입니다. 이 문제는 2/20/2025에 발생했습니다.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-20T06:16:39.233Z",
+    "updatedAt": "2025-02-21T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "issue-49",
+    "title": "이슈 49: 안전 부서 문제",
+    "description": "이슈 49에 대한 상세 설명입니다. 이 문제는 3/12/2025에 발생했습니다.",
+    "status": "RESOLVED",
+    "priority": "LOW",
+    "department": "안전",
+    "issueType": "지그 문제",
+    "assignedTo": {
+      "id": "e27ebccd-dcee-4768-a407-541fb3167b2c",
+      "name": "토이",
+      "email": "toy@toy.com",
+      "department": "생산"
+    },
+    "createdBy": {
+      "id": "worker-4",
+      "name": "최관리자",
+      "email": "choi@example.com",
+      "companyId": "EMP004"
+    },
+    "createdAt": "2025-03-12T06:16:39.233Z",
+    "updatedAt": "2025-03-12T07:10:18.265Z",
+    "resolvedAt": "2025-03-12T07:10:18.265Z",
+    "solution": "이슈 49에 대한 해결 방법입니다."
+  },
+  {
+    "id": "issue-50",
+    "title": "이슈 50: 안전 부서 문제",
+    "description": "이슈 50에 대한 상세 설명입니다. 이 문제는 2/13/2025에 발생했습니다.",
+    "status": "OPEN",
+    "priority": "CRITICAL",
+    "department": "생산",
+    "issueType": "원자재 문제",
+    "assignedTo": {
+      "id": "worker-5",
+      "name": "정감독관",
+      "email": "jung@example.com",
+      "companyId": "EMP005"
+    },
+    "createdBy": {
+      "id": "worker-2",
+      "name": "이엔지니어",
+      "email": "lee@example.com",
+      "companyId": "EMP002"
+    },
+    "createdAt": "2025-02-13T06:16:39.233Z",
+    "updatedAt": "2025-02-16T06:16:39.233Z",
+    "resolvedAt": null,
+    "solution": null
+  }
+]

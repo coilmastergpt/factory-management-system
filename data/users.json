@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "name": "관리자",
+    "email": "admin@example.com",
+    "role": "ADMIN",
+    "department": "시스템관리",
+    "createdAt": "2025-03-12T04:32:47.671Z"
+  },
+  {
+    "id": "2",
+    "name": "매니저",
+    "email": "manager@example.com",
+    "role": "MANAGER",
+    "department": "운영",
+    "createdAt": "2025-03-12T04:32:47.671Z"
+  },
+  {
+    "id": "e27ebccd-dcee-4768-a407-541fb3167b2c",
+    "name": "토이",
+    "email": "toy@toy.com",
+    "role": "MANAGER",
+    "department": "생산",
+    "createdAt": "2025-03-12T04:32:58.734Z"
+  },
+  {
+    "id": "099fc83f-b8af-4390-acc2-23755c49d029",
+    "name": "SAM",
+    "email": "SAM@SAM.COM",
+    "role": "MANAGER",
+    "department": "생산",
+    "createdAt": "2025-03-12T07:01:12.610Z"
+  }
+]

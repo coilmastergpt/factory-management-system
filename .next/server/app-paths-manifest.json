@@ -1,0 +1,10 @@
+{
+  "/page": "app/page.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/issues/page": "app/issues/page.js",
+  "/api/filter-presets/route": "app/api/filter-presets/route.js",
+  "/api/users/route": "app/api/users/route.js",
+  "/api/issues/route": "app/api/issues/route.js",
+  "/users/page": "app/users/page.js",
+  "/settings/page": "app/settings/page.js"
+}
