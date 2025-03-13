@@ -22,11 +22,13 @@ import {
   IconButton,
   Image,
   Progress,
+  ModalFooter,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AddIcon, CloseIcon } from '@chakra-ui/icons';
 import { useFileUpload } from './FileUploadHelper';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CreateIssueModalProps {
   isOpen: boolean;
@@ -51,6 +53,8 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploading, uploadFiles, formatFileSize } = useFileUpload();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,14 +151,14 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }} motionPreset="slideInBottom">
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>이슈 생성</ModalHeader>
-        <ModalCloseButton />
+      <ModalContent borderRadius={{ base: 0, md: "md" }}>
+        <ModalHeader fontSize="xl">이슈 생성</ModalHeader>
+        <ModalCloseButton size="lg" />
         <ModalBody pb={6}>
           <form onSubmit={handleSubmit}>
-            <VStack spacing={4}>
+            <VStack spacing={5}>
               <FormControl isRequired>
                 <FormLabel>제목</FormLabel>
                 <Input
@@ -278,17 +282,44 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
                 )}
               </FormControl>
 
-              <Button
-                type="submit"
-                colorScheme="blue"
-                width="full"
-                isLoading={isLoading || uploading}
-              >
-                생성
-              </Button>
             </VStack>
           </form>
         </ModalBody>
+        <ModalFooter 
+          bg="gray.50" 
+          borderTopWidth="1px" 
+          borderColor="gray.200"
+          flexDirection={{ base: "column", md: "row" }}
+          gap={3}
+        >
+          <Button
+            colorScheme="brand"
+            onClick={handleSubmit}
+            isLoading={isLoading || uploading}
+            size="lg"
+            fontWeight="bold"
+            mr={{ base: 0, md: 3 }}
+            mb={{ base: 3, md: 0 }}
+            color="black"
+            fontSize="md"
+            bg="brand.400"
+            borderWidth="2px"
+            borderColor="brand.300"
+            width={{ base: "100%", md: "auto" }}
+          >
+            이슈 등록
+          </Button>
+          <Button 
+            onClick={onClose} 
+            variant="outline" 
+            size="lg"
+            color="black"
+            fontWeight="bold"
+            width={{ base: "100%", md: "auto" }}
+          >
+            취소
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

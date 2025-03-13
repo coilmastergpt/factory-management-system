@@ -40,13 +40,16 @@ import {
   MenuItem,
   Tooltip,
   Divider,
-  ButtonGroup
+  ButtonGroup,
+  InputGroup,
+  InputRightElement
 } from '@chakra-ui/react';
 import { AddIcon, ChevronDownIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/navigation';
 import IssueFilterComponent from '../components/IssueFilter';
 import FilterPresetManager from '../components/FilterPresetManager';
 import { useFileUpload, UploadedFile } from '../components/FileUploadHelper';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // 이슈 타입 정의
 interface Issue {
@@ -132,6 +135,7 @@ export default function IssuesPage() {
   const router = useRouter();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { t } = useLanguage();
   
   // 상태 관리
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -292,8 +296,8 @@ export default function IssuesPage() {
         }));
         
         toast({
-          title: '파일 업로드 성공',
-          description: `${files.length}개의 파일이 업로드되었습니다.`,
+          title: t('toast.upload.success'),
+          description: `${files.length}${t('table.attachments')}`,
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -302,8 +306,8 @@ export default function IssuesPage() {
     } catch (error) {
       console.error('파일 업로드 오류:', error);
       toast({
-        title: '파일 업로드 실패',
-        description: '파일 업로드 중 오류가 발생했습니다.',
+        title: t('toast.upload.fail'),
+        description: t('toast.upload.failDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -324,8 +328,8 @@ export default function IssuesPage() {
     try {
       if (!newIssue.title.trim()) {
         toast({
-          title: '제목 필수',
-          description: '이슈 제목을 입력해주세요.',
+          title: t('toast.title.required'),
+          description: t('toast.title.requiredDesc'),
           status: 'warning',
           duration: 3000,
           isClosable: true,
@@ -335,8 +339,8 @@ export default function IssuesPage() {
       
       if (!newIssue.createdById) {
         toast({
-          title: '발견자 필수',
-          description: '문제를 발견한 작업자를 선택해주세요.',
+          title: t('toast.reporter.required'),
+          description: t('toast.reporter.requiredDesc'),
           status: 'warning',
           duration: 3000,
           isClosable: true,
@@ -346,8 +350,8 @@ export default function IssuesPage() {
       
       if (!newIssue.issueType) {
         toast({
-          title: '문제 유형 필수',
-          description: '문제 유형을 선택해주세요.',
+          title: t('toast.issueType.required'),
+          description: t('toast.issueType.requiredDesc'),
           status: 'warning',
           duration: 3000,
           isClosable: true,
@@ -370,8 +374,8 @@ export default function IssuesPage() {
       
       // 성공 메시지 표시
       toast({
-        title: '이슈 생성 성공',
-        description: '새 이슈가 생성되었습니다.',
+        title: t('toast.issue.createSuccess'),
+        description: t('toast.issue.createSuccessDesc'),
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -396,8 +400,8 @@ export default function IssuesPage() {
     } catch (error) {
       console.error('이슈 생성 오류:', error);
       toast({
-        title: '이슈 생성 실패',
-        description: '이슈를 생성하는데 실패했습니다.',
+        title: t('toast.issue.createFail'),
+        description: t('toast.issue.createFailDesc'),
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -466,119 +470,154 @@ export default function IssuesPage() {
   }, [filter, sort, pagination.page, pagination.limit, dateFilter]);
   
   return (
-    <Container maxW="container.xl" py={5}>
-      <Flex justifyContent="space-between" alignItems="center" mb={6}>
-        <Heading size="lg">이슈 관리</Heading>
-        <Button leftIcon={<AddIcon />} colorScheme="blue" onClick={onOpen}>
-          새 이슈
-        </Button>
-      </Flex>
-      
-      {/* 필터 영역 */}
+    <Container maxW="container.xl" py={6}>
       <Box mb={6}>
-        <Flex justifyContent="space-between" mb={4}>
+        <Flex 
+          justifyContent="space-between" 
+          alignItems={{ base: "stretch", md: "center" }} 
+          mb={4}
+          direction={{ base: "column", md: "row" }}
+          gap={4}
+        >
+          <Heading size="lg">{t('issues.title')}</Heading>
+          <Button
+            leftIcon={<AddIcon />}
+            colorScheme="brand"
+            onClick={onOpen}
+            shadow="md"
+            size="lg"
+            fontWeight="bold"
+            width={{ base: "100%", md: "auto" }}
+            borderWidth="2px"
+            borderColor="brand.300"
+            bg="brand.500"
+            color="black"
+            fontSize="lg"
+            textShadow="0 1px 2px rgba(255, 255, 255, 0.5)"
+            _hover={{
+              bg: "brand.600",
+              borderColor: "brand.400",
+              transform: "translateY(-2px)",
+              boxShadow: "lg"
+            }}
+            _active={{
+              bg: "brand.700",
+              transform: "translateY(0)",
+            }}
+            transition="all 0.2s"
+          >
+            {t('issues.create')}
+          </Button>
+        </Flex>
+        <Text color="gray.600" mb={4}>
+          {t('issues.description')}
+        </Text>
+      </Box>
+
+      {/* 필터 영역 */}
+      <Box 
+        mb={6} 
+        p={4} 
+        bg="white" 
+        borderRadius="lg" 
+        shadow="sm"
+        borderWidth="1px"
+        borderColor="gray.200"
+      >
+        <Flex direction={{ base: 'column', md: 'row' }} gap={4} mb={4}>
           <IssueFilterComponent
             filter={filter}
             onFilterChange={setFilter}
             onSearch={fetchIssues}
           />
-          <FilterPresetManager
-            currentFilter={filter}
-            onPresetSelect={setFilter}
-          />
+          <Box flex="1">
+            <FormControl>
+              <FormLabel fontSize="sm">{t('issues.search')}</FormLabel>
+              <InputGroup>
+                <Input
+                  placeholder={t('issues.search')}
+                  value={filter.search || ''}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                />
+                <InputRightElement>
+                  <SearchIcon color="gray.400" />
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
+          </Box>
         </Flex>
-        
-        {/* 날짜 필터 추가 */}
-        <Flex mt={4} gap={4} alignItems="center">
-          <Box>
-            <FormLabel fontSize="sm">날짜 범위</FormLabel>
+
+        <Flex direction={{ base: 'column', md: 'row' }} gap={4} alignItems="flex-end">
+          <Box flex="1">
+            <FormLabel fontSize="sm">{t('issues.date.range')}</FormLabel>
             <Flex gap={2} alignItems="center">
               <Input
                 type="date"
                 value={dateFilter.startDate}
                 onChange={(e) => handleDateFilterChange('startDate', e.target.value)}
-                size="sm"
-                w="150px"
+                size="md"
               />
               <Text>~</Text>
               <Input
                 type="date"
                 value={dateFilter.endDate}
                 onChange={(e) => handleDateFilterChange('endDate', e.target.value)}
-                size="sm"
-                w="150px"
+                size="md"
               />
             </Flex>
           </Box>
-          
-          <Box>
-            <FormLabel fontSize="sm">월별 필터</FormLabel>
-            <Select
-              value={dateFilter.month}
-              onChange={(e) => handleDateFilterChange('month', e.target.value)}
-              size="sm"
-              w="150px"
+          <ButtonGroup size="md">
+            <Button
+              colorScheme="brand"
+              onClick={fetchIssues}
+              leftIcon={<SearchIcon />}
             >
-              <option value="">전체</option>
-              <option value="1">1월</option>
-              <option value="2">2월</option>
-              <option value="3">3월</option>
-              <option value="4">4월</option>
-              <option value="5">5월</option>
-              <option value="6">6월</option>
-              <option value="7">7월</option>
-              <option value="8">8월</option>
-              <option value="9">9월</option>
-              <option value="10">10월</option>
-              <option value="11">11월</option>
-              <option value="12">12월</option>
-            </Select>
-          </Box>
-          
-          <Button
-            colorScheme="blue"
-            size="sm"
-            onClick={fetchIssues}
-            ml={2}
-          >
-            필터 적용
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setDateFilter({
-                startDate: '',
-                endDate: '',
-                month: ''
-              });
-            }}
-          >
-            날짜 필터 초기화
-          </Button>
+              {t('issues.filter.apply')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDateFilter({
+                  startDate: '',
+                  endDate: '',
+                  month: ''
+                });
+                setFilter({});
+                fetchIssues();
+              }}
+            >
+              {t('issues.filter.reset')}
+            </Button>
+          </ButtonGroup>
         </Flex>
       </Box>
       
       {/* 이슈 목록 */}
-      <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+      <Box 
+        borderWidth="1px" 
+        borderRadius="lg" 
+        overflow="hidden" 
+        bg="white" 
+        shadow="sm"
+        borderColor="gray.200"
+      >
         {loading ? (
           <Center p={8}>
-            <Spinner size="xl" />
+            <Spinner size="xl" color="brand.500" thickness="4px" />
           </Center>
         ) : issues.length === 0 ? (
           <Center p={8} flexDirection="column">
-            <Text fontSize="lg" mb={4}>이슈가 없습니다.</Text>
-            <Button colorScheme="blue" onClick={onOpen}>새 이슈 생성</Button>
+            <Text fontSize="lg" mb={4} color="gray.600">{t('issues.empty')}</Text>
+            <Button colorScheme="brand" onClick={onOpen} leftIcon={<AddIcon />}>{t('issues.create')}</Button>
           </Center>
         ) : (
           <>
             <Table variant="simple">
               <Thead bg="gray.50">
                 <Tr>
-                  <Th width="80px">번호</Th>
+                  <Th width="80px">{t('table.number')}</Th>
                   <Th cursor="pointer" onClick={() => handleSortChange('title')}>
-                    제목
+                    {t('table.title')}
                     {sort.field === 'title' && (
                       <ChevronDownIcon 
                         ml={1} 
@@ -586,14 +625,14 @@ export default function IssuesPage() {
                       />
                     )}
                   </Th>
-                  <Th>상태</Th>
-                  <Th>우선순위</Th>
-                  <Th>부서</Th>
-                  <Th>문제 유형</Th>
-                  <Th>발견자</Th>
-                  <Th>담당자</Th>
+                  <Th>{t('table.status')}</Th>
+                  <Th>{t('table.priority')}</Th>
+                  <Th>{t('table.department')}</Th>
+                  <Th>{t('table.issueType')}</Th>
+                  <Th>{t('table.reporter')}</Th>
+                  <Th>{t('table.assignee')}</Th>
                   <Th cursor="pointer" onClick={() => handleSortChange('createdAt')}>
-                    생성일
+                    {t('table.createdAt')}
                     {sort.field === 'createdAt' && (
                       <ChevronDownIcon 
                         ml={1} 
@@ -602,7 +641,7 @@ export default function IssuesPage() {
                     )}
                   </Th>
                   <Th cursor="pointer" onClick={() => handleSortChange('resolvedAt')}>
-                    완료일
+                    {t('table.resolvedAt')}
                     {sort.field === 'resolvedAt' && (
                       <ChevronDownIcon 
                         ml={1} 
@@ -619,29 +658,35 @@ export default function IssuesPage() {
                     _hover={{ bg: 'gray.50' }}
                     cursor="pointer"
                     onClick={() => navigateToIssueDetail(issue.id)}
+                    transition="background-color 0.2s"
                   >
                     <Td>
-                      <Badge colorScheme="blue" borderRadius="full" px={2}>
+                      <Badge colorScheme="brand" borderRadius="full" px={2}>
                         {isNaN(parseInt(issue.id)) ? issue.id.split('-')[1] : issue.id}
                       </Badge>
                     </Td>
                     <Td fontWeight="medium">
                       {issue.title}
+                      {issue.attachments && issue.attachments.length > 0 && (
+                        <Text as="span" ml={2} color="gray.500" fontSize="sm">
+                          ({t('table.attachments')} {issue.attachments.length})
+                        </Text>
+                      )}
                     </Td>
                     <Td>
                       <Badge colorScheme={statusColors[issue.status]}>
-                        {issue.status === 'OPEN' && '대기중'}
-                        {issue.status === 'IN_PROGRESS' && '진행중'}
-                        {issue.status === 'RESOLVED' && '해결됨'}
-                        {issue.status === 'CLOSED' && '종료'}
+                        {issue.status === 'OPEN' && t('status.open')}
+                        {issue.status === 'IN_PROGRESS' && t('status.inProgress')}
+                        {issue.status === 'RESOLVED' && t('status.resolved')}
+                        {issue.status === 'CLOSED' && t('status.closed')}
                       </Badge>
                     </Td>
                     <Td>
                       <Badge colorScheme={priorityColors[issue.priority]}>
-                        {issue.priority === 'LOW' && '낮음'}
-                        {issue.priority === 'MEDIUM' && '중간'}
-                        {issue.priority === 'HIGH' && '높음'}
-                        {issue.priority === 'CRITICAL' && '긴급'}
+                        {issue.priority === 'LOW' && t('priority.low')}
+                        {issue.priority === 'MEDIUM' && t('priority.medium')}
+                        {issue.priority === 'HIGH' && t('priority.high')}
+                        {issue.priority === 'CRITICAL' && t('priority.critical')}
                       </Badge>
                     </Td>
                     <Td>{issue.department}</Td>
@@ -657,7 +702,7 @@ export default function IssuesPage() {
             
             {/* 페이지네이션 */}
             {pagination.totalPages > 1 && (
-              <Flex justifyContent="center" p={4}>
+              <Flex justifyContent="center" p={4} borderTopWidth="1px" borderColor="gray.200">
                 <ButtonGroup variant="outline" spacing={2}>
                   <IconButton
                     aria-label="이전 페이지"
@@ -680,7 +725,7 @@ export default function IssuesPage() {
                             <Button variant="ghost" isDisabled>...</Button>
                             <Button
                               variant={pagination.page === page ? 'solid' : 'outline'}
-                              colorScheme={pagination.page === page ? 'blue' : 'gray'}
+                              colorScheme={pagination.page === page ? 'brand' : 'gray'}
                               onClick={() => handlePageChange(page)}
                             >
                               {page}
@@ -693,7 +738,7 @@ export default function IssuesPage() {
                         <Button
                           key={page}
                           variant={pagination.page === page ? 'solid' : 'outline'}
-                          colorScheme={pagination.page === page ? 'blue' : 'gray'}
+                          colorScheme={pagination.page === page ? 'brand' : 'gray'}
                           onClick={() => handlePageChange(page)}
                         >
                           {page}
@@ -719,23 +764,23 @@ export default function IssuesPage() {
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>새 이슈 생성</ModalHeader>
+          <ModalHeader>{t('modal.issue.create')}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4} align="stretch">
               <FormControl isRequired>
-                <FormLabel>제목</FormLabel>
+                <FormLabel>{t('modal.issue.title')}</FormLabel>
                 <Input 
-                  placeholder="이슈 제목" 
+                  placeholder={t('modal.issue.title')}
                   value={newIssue.title}
                   onChange={(e) => setNewIssue({...newIssue, title: e.target.value})}
                 />
               </FormControl>
               
               <FormControl>
-                <FormLabel>설명</FormLabel>
+                <FormLabel>{t('modal.issue.description')}</FormLabel>
                 <Textarea 
-                  placeholder="이슈에 대한 상세 설명" 
+                  placeholder={t('modal.issue.description')}
                   value={newIssue.description}
                   onChange={(e) => setNewIssue({...newIssue, description: e.target.value})}
                   rows={5}
@@ -744,7 +789,7 @@ export default function IssuesPage() {
               
               {/* 파일 첨부 영역 */}
               <FormControl>
-                <FormLabel>파일 첨부</FormLabel>
+                <FormLabel>{t('modal.issue.attachments')}</FormLabel>
                 <Box border="1px dashed" borderColor="gray.300" p={4} borderRadius="md">
                   <input
                     type="file"
@@ -759,19 +804,20 @@ export default function IssuesPage() {
                     <Button
                       as="label"
                       htmlFor="file-upload"
-                      colorScheme="blue"
+                      colorScheme="brand"
                       variant="outline"
                       isLoading={uploading}
                       loadingText="업로드 중..."
                       mb={3}
+                      leftIcon={<AddIcon />}
                     >
-                      이미지/동영상 선택
+                      {t('modal.issue.selectImage')}
                     </Button>
                     <Text fontSize="sm" color="gray.500">
-                      이미지(10MB 이하) 또는 동영상(100MB 이하) 파일을 선택하세요.
+                      {t('modal.issue.fileInfo')}
                     </Text>
                     <Text fontSize="xs" color="gray.400">
-                      파일은 자동으로 최적화되어 저장됩니다.
+                      {t('modal.issue.fileOptimize')}
                     </Text>
                   </Flex>
                 </Box>
@@ -779,7 +825,7 @@ export default function IssuesPage() {
                 {/* 첨부 파일 미리보기 */}
                 {newIssue.attachments.length > 0 && (
                   <Box mt={4}>
-                    <Text fontWeight="medium" mb={2}>첨부된 파일 ({newIssue.attachments.length}개)</Text>
+                    <Text fontWeight="medium" mb={2}>{t('modal.issue.attachedFiles')} ({newIssue.attachments.length})</Text>
                     <VStack spacing={2} align="stretch">
                       {newIssue.attachments.map((file, index) => (
                         <Flex 
@@ -790,6 +836,7 @@ export default function IssuesPage() {
                           borderRadius="md"
                           justify="space-between"
                           align="center"
+                          bg="gray.50"
                         >
                           <Flex align="center">
                             {file.type.startsWith('image/') ? (
@@ -816,7 +863,7 @@ export default function IssuesPage() {
                                 alignItems="center"
                                 justifyContent="center"
                               >
-                                <Text fontSize="xs">비디오</Text>
+                                <Text fontSize="xs">{t('modal.issue.video')}</Text>
                               </Box>
                             )}
                             <VStack spacing={0} align="start">
@@ -834,7 +881,7 @@ export default function IssuesPage() {
                             variant="ghost"
                             onClick={() => handleRemoveFile(index)}
                           >
-                            삭제
+                            {t('modal.issue.delete')}
                           </Button>
                         </Flex>
                       ))}
@@ -844,34 +891,50 @@ export default function IssuesPage() {
               </FormControl>
               
               <FormControl isRequired>
-                <FormLabel>우선순위</FormLabel>
+                <FormLabel>{t('modal.issue.priority')}</FormLabel>
                 <Select 
+                  placeholder={t('select.priority')}
                   value={newIssue.priority}
                   onChange={(e) => setNewIssue({...newIssue, priority: e.target.value})}
                 >
-                  {priorities.map((priority) => (
-                    <option key={priority.id} value={priority.value}>{priority.name}</option>
+                  <option value="LOW">{t('priority.low')}</option>
+                  <option value="MEDIUM">{t('priority.medium')}</option>
+                  <option value="HIGH">{t('priority.high')}</option>
+                  <option value="CRITICAL">{t('priority.critical')}</option>
+                </Select>
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>{t('modal.issue.department')}</FormLabel>
+                <Select 
+                  placeholder={t('select.department')}
+                  value={newIssue.department}
+                  onChange={(e) => setNewIssue({...newIssue, department: e.target.value})}
+                >
+                  <option value="생산">{t('department.production')}</option>
+                  <option value="품질">{t('department.quality')}</option>
+                  <option value="유지보수">{t('department.maintenance')}</option>
+                  <option value="안전">{t('department.safety')}</option>
+                </Select>
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>{t('modal.issue.reporter')}</FormLabel>
+                <Select 
+                  placeholder={t('select.reporter')}
+                  value={newIssue.createdById}
+                  onChange={(e) => setNewIssue({...newIssue, createdById: e.target.value})}
+                >
+                  {workers.map((worker) => (
+                    <option key={worker.id} value={worker.id}>{worker.name} ({worker.companyId})</option>
                   ))}
                 </Select>
               </FormControl>
               
               <FormControl isRequired>
-                <FormLabel>부서</FormLabel>
+                <FormLabel>{t('modal.issue.issueType')}</FormLabel>
                 <Select 
-                  value={newIssue.department}
-                  onChange={(e) => setNewIssue({...newIssue, department: e.target.value})}
-                >
-                  <option value="생산">생산</option>
-                  <option value="품질">품질</option>
-                  <option value="유지보수">유지보수</option>
-                  <option value="안전">안전</option>
-                </Select>
-              </FormControl>
-              
-              <FormControl isRequired>
-                <FormLabel>문제 유형</FormLabel>
-                <Select 
-                  placeholder="문제 유형 선택"
+                  placeholder={t('select.issueType')}
                   value={newIssue.issueType}
                   onChange={(e) => setNewIssue({...newIssue, issueType: e.target.value})}
                 >
@@ -881,34 +944,14 @@ export default function IssuesPage() {
                 </Select>
               </FormControl>
               
-              <FormControl isRequired>
-                <FormLabel>발견자</FormLabel>
-                <Select 
-                  placeholder="문제를 발견한 작업자 선택"
-                  value={newIssue.createdById}
-                  onChange={(e) => {
-                    const selectedWorker = workers.find(w => w.id === e.target.value);
-                    setNewIssue({
-                      ...newIssue, 
-                      createdById: e.target.value,
-                      createdByName: selectedWorker ? selectedWorker.name : ''
-                    });
-                  }}
-                >
-                  {workers.map((worker) => (
-                    <option key={worker.id} value={worker.id}>{worker.name} ({worker.companyId})</option>
-                  ))}
-                </Select>
-              </FormControl>
-              
               <FormControl>
-                <FormLabel>담당자</FormLabel>
+                <FormLabel>{t('modal.issue.assignee')}</FormLabel>
                 <Select 
-                  placeholder="담당자 선택 (선택사항)"
+                  placeholder={t('select.assignee')}
                   value={newIssue.assignedToId}
                   onChange={(e) => setNewIssue({...newIssue, assignedToId: e.target.value})}
                 >
-                  <option value="">담당자 없음</option>
+                  <option value="">{t('modal.issue.noAssignee')}</option>
                   {users.filter(user => user.role === 'MANAGER' || user.role === 'ADMIN').map((user) => (
                     <option key={user.id} value={user.id}>{user.name} ({user.department})</option>
                   ))}
@@ -916,16 +959,48 @@ export default function IssuesPage() {
               </FormControl>
             </VStack>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
-              취소
+          <ModalFooter 
+            bg="gray.50" 
+            borderTopWidth="1px" 
+            borderColor="gray.200"
+            flexDirection={{ base: "column", md: "row" }}
+            gap={3}
+          >
+            <Button 
+              colorScheme="brand" 
+              onClick={() => {
+                console.log('현재 이슈 상태:', {
+                  title: newIssue.title,
+                  priority: newIssue.priority,
+                  department: newIssue.department,
+                  issueType: newIssue.issueType,
+                  createdById: newIssue.createdById
+                });
+                handleCreateIssue();
+              }}
+              isDisabled={!newIssue.title}
+              leftIcon={<AddIcon />}
+              size="lg"
+              fontWeight="bold"
+              color="black"
+              bg="brand.400"
+              borderWidth="2px"
+              borderColor="brand.300"
+              width={{ base: "100%", md: "auto" }}
+              mr={{ base: 0, md: 3 }}
+              mb={{ base: 3, md: 0 }}
+            >
+              {t('modal.issue.create.button')}
             </Button>
             <Button 
-              colorScheme="blue" 
-              onClick={handleCreateIssue}
-              isDisabled={!newIssue.title || !newIssue.priority || !newIssue.department || !newIssue.issueType || !newIssue.createdById}
+              variant="outline" 
+              onClick={onClose}
+              size="lg"
+              color="black"
+              fontWeight="bold"
+              width={{ base: "100%", md: "auto" }}
             >
-              생성
+              {t('modal.issue.cancel')}
             </Button>
           </ModalFooter>
         </ModalContent>

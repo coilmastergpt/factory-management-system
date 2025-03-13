@@ -98,6 +98,10 @@ export default function NotificationBell() {
             icon={<BellIcon />}
             variant="ghost"
             size="lg"
+            color="black"
+            borderWidth="1px"
+            borderColor="brand.200"
+            _hover={{ bg: 'brand.50', borderColor: 'brand.300', color: 'black' }}
           />
           {unreadCount > 0 && (
             <Badge
