@@ -99,9 +99,10 @@ export default function NotificationBell() {
             variant="ghost"
             size="lg"
             color="black"
-            borderWidth="1px"
-            borderColor="brand.200"
-            _hover={{ bg: 'brand.50', borderColor: 'brand.300', color: 'black' }}
+            bg="yellow.100"
+            borderWidth="2px"
+            borderColor="yellow.400"
+            _hover={{ bg: 'yellow.200', borderColor: 'yellow.500', color: 'black' }}
           />
           {unreadCount > 0 && (
             <Badge

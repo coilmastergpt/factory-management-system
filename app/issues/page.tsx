@@ -482,26 +482,25 @@ export default function IssuesPage() {
           <Heading size="lg">{t('issues.title')}</Heading>
           <Button
             leftIcon={<AddIcon />}
-            colorScheme="brand"
+            colorScheme="yellow"
             onClick={onOpen}
             shadow="md"
             size="lg"
             fontWeight="bold"
             width={{ base: "100%", md: "auto" }}
-            borderWidth="2px"
-            borderColor="brand.300"
-            bg="brand.500"
-            color="black"
+            borderWidth="3px"
+            borderColor="yellow.400"
+            bg="black"
+            color="white"
             fontSize="lg"
-            textShadow="0 1px 2px rgba(255, 255, 255, 0.5)"
             _hover={{
-              bg: "brand.600",
-              borderColor: "brand.400",
+              bg: "gray.800",
+              borderColor: "yellow.300",
               transform: "translateY(-2px)",
               boxShadow: "lg"
             }}
             _active={{
-              bg: "brand.700",
+              bg: "gray.900",
               transform: "translateY(0)",
             }}
             transition="all 0.2s"

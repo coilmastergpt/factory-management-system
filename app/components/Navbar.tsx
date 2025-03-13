@@ -128,9 +128,10 @@ export default function Navbar() {
                 onClick={toggleLanguage}
                 size="md"
                 color="black"
-                borderWidth="1px"
-                borderColor="brand.200"
-                _hover={{ bg: 'brand.50', borderColor: 'brand.300', color: 'black' }}
+                bg="yellow.100"
+                borderWidth="2px"
+                borderColor="yellow.400"
+                _hover={{ bg: 'yellow.200', borderColor: 'yellow.500', color: 'black' }}
               />
             </Tooltip>
             
@@ -140,11 +141,12 @@ export default function Navbar() {
                   as={Button} 
                   rightIcon={<HiChevronDown />}
                   variant="ghost"
-                  borderWidth="1px"
-                  borderColor="brand.200"
+                  borderWidth="2px"
+                  borderColor="yellow.400"
                   color="black"
+                  bg="yellow.100"
                   fontWeight="bold"
-                  _hover={{ bg: 'brand.50', borderColor: 'brand.300', color: 'black' }}
+                  _hover={{ bg: 'yellow.200', borderColor: 'yellow.500', color: 'black' }}
                 >
                   <Flex alignItems="center">
                     <Avatar size="xs" name={user.name} mr={2} bg="brand.500" />

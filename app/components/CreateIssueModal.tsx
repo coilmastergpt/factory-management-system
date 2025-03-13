@@ -293,19 +293,18 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
           gap={3}
         >
           <Button
-            colorScheme="brand"
+            colorScheme="yellow"
             onClick={handleSubmit}
             isLoading={isLoading || uploading}
             size="lg"
             fontWeight="bold"
-            mr={{ base: 0, md: 3 }}
-            mb={{ base: 3, md: 0 }}
-            color="black"
+            flex="1"
+            mr={3}
+            color="white"
+            bg="black"
+            borderWidth="3px"
+            borderColor="yellow.400"
             fontSize="md"
-            bg="brand.400"
-            borderWidth="2px"
-            borderColor="brand.300"
-            width={{ base: "100%", md: "auto" }}
           >
             이슈 등록
           </Button>
@@ -313,9 +312,12 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
             onClick={onClose} 
             variant="outline" 
             size="lg"
+            flex="1"
             color="black"
+            bg="yellow.100"
+            borderWidth="2px"
+            borderColor="yellow.400"
             fontWeight="bold"
-            width={{ base: "100%", md: "auto" }}
           >
             취소
           </Button>
