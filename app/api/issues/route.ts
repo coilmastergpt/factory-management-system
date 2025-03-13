@@ -10,11 +10,11 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 // 모의 데이터 생성
 const workers = [
-  { id: 'worker-1', name: '김작업자', email: 'kim@example.com', companyId: 'EMP001' },
-  { id: 'worker-2', name: '이엔지니어', email: 'lee@example.com', companyId: 'EMP002' },
-  { id: 'worker-3', name: '박기술자', email: 'park@example.com', companyId: 'EMP003' },
-  { id: 'worker-4', name: '최관리자', email: 'choi@example.com', companyId: 'EMP004' },
-  { id: 'worker-5', name: '정감독관', email: 'jung@example.com', companyId: 'EMP005' }
+  { id: 'worker-1', name: '김작업자', email: 'kim@example.com', companyId: 'EMP001', department: '생산' },
+  { id: 'worker-2', name: '이엔지니어', email: 'lee@example.com', companyId: 'EMP002', department: '품질' },
+  { id: 'worker-3', name: '박기술자', email: 'park@example.com', companyId: 'EMP003', department: '유지보수' },
+  { id: 'worker-4', name: 'Thomas cha', email: 'choi@example.com', companyId: 'EMP004', department: '안전' },
+  { id: 'worker-5', name: '정감독관', email: 'jung@example.com', companyId: 'EMP005', department: '안전' }
 ];
 
 const issueTypes = [
@@ -55,11 +55,18 @@ interface Issue {
     name: string;
     email: string;
     companyId: string;
+    department?: string;
   };
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;
   solution: string | null;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+  }>;
 }
 
 // 사용자 데이터 로드
@@ -112,7 +119,13 @@ const generateMockIssues = (count: number): Issue[] => {
       department: departments[Math.floor(Math.random() * departments.length)],
       issueType: issueType,
       assignedTo: assignedTo,
-      createdBy: createdBy,
+      createdBy: {
+        id: createdBy.id,
+        name: createdBy.name,
+        email: createdBy.email,
+        companyId: createdBy.companyId || '',
+        department: createdBy.department
+      },
       createdAt: createdDate.toISOString(),
       updatedAt: updatedDate.toISOString(),
       resolvedAt: resolvedAt ? resolvedAt.toISOString() : null,
@@ -318,81 +331,107 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('이슈 생성 요청 받음');
+  
   try {
+    // 요청 데이터 파싱
     const data = await request.json();
     console.log('이슈 생성 요청 데이터:', data);
     
     // 필수 필드 검증
-    if (!data.title || !data.createdById) {
-      return NextResponse.json(
-        { error: '제목과 작업자는 필수 항목입니다.' },
-        { status: 400 }
-      );
+    if (!data.title || !data.priority || !data.department || !data.issueType || !data.createdById) {
+      return NextResponse.json({ error: '필수 필드가 누락되었습니다.' }, { status: 400 });
     }
     
-    // 작업자 정보 찾기
-    const createdBy = workers.find(w => w.id === data.createdById);
-    if (!createdBy) {
-      return NextResponse.json(
-        { error: '유효하지 않은 작업자 ID입니다.' },
-        { status: 400 }
-      );
+    // 작업자 데이터 가져오기
+    const settingsResponse = await fetch(new URL('/api/settings', request.url));
+    const settingsData = await settingsResponse.json();
+    const workers = settingsData.workers || [];
+    
+    console.log('작업자 데이터:', workers);
+    
+    // 작업자 ID로 작업자 찾기
+    const createdByWorker = workers.find((worker: any) => worker.id === data.createdById);
+    console.log('찾은 작업자:', createdByWorker, '요청된 ID:', data.createdById);
+    
+    if (!createdByWorker) {
+      return NextResponse.json({ error: '유효하지 않은 작업자 ID입니다.' }, { status: 400 });
     }
     
-    // 담당자 정보 찾기 (있는 경우)
+    // 담당자 정보 가져오기
     let assignedTo = null;
     if (data.assignedToId) {
-      // 먼저 workers 배열에서 찾기
-      assignedTo = workers.find(w => w.id === data.assignedToId);
+      const usersResponse = await fetch(new URL('/api/users', request.url));
+      const users = await usersResponse.json();
+      const assignedUser = users.find((user: any) => user.id === data.assignedToId);
       
-      // workers에 없으면 사용자 데이터에서 찾기
-      if (!assignedTo) {
-        const users = loadUsers();
-        const user = users.find(u => u.id === data.assignedToId);
-        
-        if (user) {
-          assignedTo = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            companyId: user.companyId || ''
-          };
-        } else {
-          console.warn(`담당자 ID ${data.assignedToId}를 찾을 수 없습니다. 담당자 없이 이슈를 생성합니다.`);
-        }
+      if (assignedUser) {
+        assignedTo = {
+          id: assignedUser.id,
+          name: assignedUser.name,
+          email: assignedUser.email
+        };
       }
     }
     
-    // 새 이슈 생성
-    const now = new Date();
+    // 기존 이슈 데이터 로드
+    let issues: Issue[] = [];
+    if (fs.existsSync(ISSUES_FILE)) {
+      const fileData = fs.readFileSync(ISSUES_FILE, 'utf8');
+      issues = JSON.parse(fileData);
+    }
+    
+    // 새 이슈 ID 생성 (순차적 ID)
+    let newId = '1';
+    if (issues.length > 0) {
+      const issueIds = issues.map(issue => parseInt(issue.id)).filter(id => !isNaN(id));
+      if (issueIds.length > 0) {
+        const maxId = Math.max(...issueIds);
+        newId = String(maxId + 1);
+      }
+    }
+    
+    // 현재 시간
+    const now = new Date().toISOString();
+    
+    // 새 이슈 객체 생성
     const newIssue: Issue = {
-      id: `issue-${uuidv4()}`,
+      id: newId,
       title: data.title,
       description: data.description || '',
       status: 'OPEN',
-      priority: data.priority || 'MEDIUM',
-      department: data.department || '생산',
-      issueType: data.issueType || '',
-      assignedTo: assignedTo,
-      createdBy: createdBy,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      priority: data.priority,
+      department: data.department,
+      issueType: data.issueType,
+      assignedTo,
+      createdBy: {
+        id: createdByWorker.id,
+        name: createdByWorker.name,
+        email: createdByWorker.email || '',
+        companyId: createdByWorker.companyId,
+        department: createdByWorker.department
+      },
+      createdAt: now,
+      updatedAt: now,
       resolvedAt: null,
-      solution: null
+      solution: null,
+      attachments: data.attachments || []
     };
     
-    // 이슈 목록에 추가
-    mockIssues.push(newIssue);
+    // 이슈 추가 및 저장
+    issues.push(newIssue);
     
-    // 이슈 데이터 저장
-    saveIssues(mockIssues);
+    // 데이터 디렉토리가 없으면 생성
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
     
-    return NextResponse.json(newIssue, { status: 201 });
+    // 파일에 저장
+    fs.writeFileSync(ISSUES_FILE, JSON.stringify(issues, null, 2));
+    
+    return NextResponse.json(newIssue);
   } catch (error) {
-    console.error('이슈 생성 중 오류 발생:', error);
-    return NextResponse.json(
-      { error: '이슈 생성 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    console.error('이슈 생성 오류:', error);
+    return NextResponse.json({ error: '이슈 생성 중 오류가 발생했습니다.' }, { status: 500 });
   }
 } 

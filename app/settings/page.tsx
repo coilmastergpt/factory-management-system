@@ -467,6 +467,21 @@ export default function SettingsPage() {
   // 작업자 추가/수정
   const handleWorkerSave = async () => {
     try {
+      // 직원 ID 중복 검사
+      if (!editingWorker || (editingWorker && editingWorker.companyId !== newWorker.companyId)) {
+        const isDuplicateId = workers.some(worker => worker.companyId === newWorker.companyId);
+        if (isDuplicateId) {
+          toast({
+            title: '이미 있는 ID입니다',
+            description: '이미 등록된 직원 ID입니다. 다른 ID를 사용해주세요.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+          return;
+        }
+      }
+
       const payload = {
         type: 'workers',
         item: editingWorker 
@@ -864,18 +879,20 @@ export default function SettingsPage() {
               <Table variant="simple">
                 <Thead bg="gray.50">
                   <Tr>
-                    <Th>이름</Th>
                     <Th>직원 ID</Th>
+                    <Th>이름</Th>
                     <Th>이메일</Th>
                     <Th>부서</Th>
                     <Th width="100px">작업</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {workers.map((worker) => (
+                  {workers
+                    .sort((a, b) => a.companyId.localeCompare(b.companyId))
+                    .map((worker) => (
                     <Tr key={worker.id}>
-                      <Td>{worker.name}</Td>
                       <Td>{worker.companyId}</Td>
+                      <Td>{worker.name}</Td>
                       <Td>{worker.email}</Td>
                       <Td>{worker.department}</Td>
                       <Td>
@@ -1020,20 +1037,20 @@ export default function SettingsPage() {
           <ModalBody>
             <VStack spacing={4}>
               <FormControl isRequired>
-                <FormLabel>이름</FormLabel>
-                <Input 
-                  placeholder="작업자 이름" 
-                  value={newWorker.name}
-                  onChange={handleNameChange}
-                />
-              </FormControl>
-              
-              <FormControl isRequired>
                 <FormLabel>직원 ID</FormLabel>
                 <Input 
                   placeholder="직원 ID" 
                   value={newWorker.companyId}
                   onChange={handleCompanyIdChange}
+                />
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel>이름</FormLabel>
+                <Input 
+                  placeholder="작업자 이름" 
+                  value={newWorker.name}
+                  onChange={handleNameChange}
                 />
               </FormControl>
               

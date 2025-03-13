@@ -1,0 +1,38 @@
+[
+  {
+    "id": "5f258c11-b30f-43fb-a651-735637b20e9c",
+    "issueId": "issue-10",
+    "content": "원자재가 없어 늦어지고 있습니다. 내일 해결 됩니다. ",
+    "createdAt": "2025-03-12T11:36:50.333Z",
+    "updatedAt": "2025-03-12T11:36:50.333Z",
+    "createdBy": {
+      "id": "694c8b72-dc63-4f95-b9a8-8e14a42aa6da",
+      "name": "Toy",
+      "email": "toy@toy.com"
+    }
+  },
+  {
+    "id": "4106541b-d72f-4d74-8a64-c9db22e92100",
+    "issueId": "issue-10",
+    "content": "해결되었습니다. ",
+    "createdAt": "2025-03-12T11:49:43.225Z",
+    "updatedAt": "2025-03-12T11:49:43.225Z",
+    "createdBy": {
+      "id": "694c8b72-dc63-4f95-b9a8-8e14a42aa6da",
+      "name": "Toy",
+      "email": "toy@toy.com"
+    }
+  },
+  {
+    "id": "f87baa3f-7586-4e76-af61-4314370a5f88",
+    "issueId": "issue-51",
+    "content": "고쳧습니다.",
+    "createdAt": "2025-03-13T00:43:02.711Z",
+    "updatedAt": "2025-03-13T00:43:02.711Z",
+    "createdBy": {
+      "id": "1",
+      "name": "관리자",
+      "email": "admin@example.com"
+    }
+  }
+]

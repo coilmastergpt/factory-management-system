@@ -15,7 +15,19 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { Comment } from '../types/issue';
+
+// 댓글 인터페이스 정의
+interface Comment {
+  id: string;
+  content: string;
+  createdBy: {
+    id: string;
+    name: string;
+    email?: string;
+  };
+  createdAt: string;
+  issueId?: string;
+}
 
 interface CommentSectionProps {
   issueId: string;
@@ -138,9 +150,9 @@ export default function CommentSection({ issueId, comments: externalComments, se
           {comments.map((comment) => (
             <Box key={comment.id} p={4} borderWidth="1px" borderRadius="md">
               <HStack spacing={4} mb={2}>
-                <Avatar size="sm" name={comment.author.name} />
+                <Avatar size="sm" name={comment.createdBy.name} />
                 <Box>
-                  <Text fontWeight="bold">{comment.author.name}</Text>
+                  <Text fontWeight="bold">{comment.createdBy.name}</Text>
                   <Text fontSize="sm" color="gray.500">
                     {formatDate(comment.createdAt)}
                   </Text>

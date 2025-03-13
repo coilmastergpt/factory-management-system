@@ -111,7 +111,7 @@ export default function UsersPage() {
   type SortField = 'name' | 'email' | 'role' | 'department' | 'companyId' | 'createdAt';
   type SortDirection = 'asc' | 'desc';
   
-  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortField, setSortField] = useState<SortField>('companyId');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -435,47 +435,59 @@ export default function UsersPage() {
 
   // 정렬된 사용자 목록 계산
   const getSortedUsers = () => {
-    return [...filteredUsers].sort((a, b) => {
-      let valueA, valueB;
-      
-      // 필드에 따라 비교할 값 설정
-      switch (sortField) {
-        case 'name':
-          valueA = a.name.toLowerCase();
-          valueB = b.name.toLowerCase();
-          break;
-        case 'email':
-          valueA = a.email.toLowerCase();
-          valueB = b.email.toLowerCase();
-          break;
-        case 'role':
-          valueA = a.role;
-          valueB = b.role;
-          break;
-        case 'department':
-          valueA = a.department.toLowerCase();
-          valueB = b.department.toLowerCase();
-          break;
-        case 'companyId':
-          valueA = a.companyId?.toLowerCase() || '';
-          valueB = b.companyId?.toLowerCase() || '';
-          break;
-        case 'createdAt':
-          valueA = new Date(a.createdAt).getTime();
-          valueB = new Date(b.createdAt).getTime();
-          break;
-        default:
-          valueA = a.name.toLowerCase();
-          valueB = b.name.toLowerCase();
-      }
-      
-      // 정렬 방향에 따라 비교
-      if (sortDirection === 'asc') {
-        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
-      } else {
-        return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
-      }
+    // 기본적으로 직원 ID로 정렬
+    let sorted = [...filteredUsers].sort((a, b) => {
+      const companyIdA = a.companyId || '';
+      const companyIdB = b.companyId || '';
+      return companyIdA.localeCompare(companyIdB);
     });
+    
+    // 사용자가 다른 필드로 정렬을 선택한 경우
+    if (sortField !== 'companyId' || sortDirection !== 'asc') {
+      sorted = sorted.sort((a, b) => {
+        let valueA, valueB;
+        
+        // 필드에 따라 비교할 값 설정
+        switch (sortField) {
+          case 'name':
+            valueA = a.name.toLowerCase();
+            valueB = b.name.toLowerCase();
+            break;
+          case 'email':
+            valueA = a.email.toLowerCase();
+            valueB = b.email.toLowerCase();
+            break;
+          case 'role':
+            valueA = a.role;
+            valueB = b.role;
+            break;
+          case 'department':
+            valueA = a.department.toLowerCase();
+            valueB = b.department.toLowerCase();
+            break;
+          case 'companyId':
+            valueA = a.companyId?.toLowerCase() || '';
+            valueB = b.companyId?.toLowerCase() || '';
+            break;
+          case 'createdAt':
+            valueA = new Date(a.createdAt).getTime();
+            valueB = new Date(b.createdAt).getTime();
+            break;
+          default:
+            valueA = a.name.toLowerCase();
+            valueB = b.name.toLowerCase();
+        }
+        
+        // 정렬 방향에 따라 비교
+        if (sortDirection === 'asc') {
+          return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+        } else {
+          return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+        }
+      });
+    }
+    
+    return sorted;
   };
 
   // 정렬된 사용자 목록
@@ -561,13 +573,22 @@ export default function UsersPage() {
   // 직원 ID 변경 시 이름 자동 설정
   const handleCompanyIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const companyId = e.target.value;
-    setEditingUser({...editingUser!, companyId});
+    if (!editingUser) return;
     
-    // 직원 ID로 이름 찾기
-    if (companyId && editingUser) {
-      const name = findUserNameById(companyId);
-      if (name && name !== editingUser.name) {
-        setEditingUser(prev => ({...prev!, name}));
+    setEditingUser({...editingUser, companyId});
+    
+    // 직원 ID로 작업자 정보 찾기
+    if (companyId) {
+      // 작업자 관리에서 해당 직원 ID를 가진 작업자 찾기
+      const worker = allUsers.find(user => user.companyId === companyId);
+      if (worker) {
+        // 작업자 정보로 폼 데이터 자동 채우기
+        setEditingUser({
+          ...editingUser,
+          name: worker.name,
+          email: worker.email || editingUser.email,
+          department: worker.department || editingUser.department
+        });
       }
     }
   };
@@ -575,13 +596,20 @@ export default function UsersPage() {
   // 이름 변경 시 직원 ID 자동 설정
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    setEditingUser({...editingUser!, name});
+    if (!editingUser) return;
     
-    // 이름으로 직원 ID 찾기
-    if (name && editingUser && !editingUser.companyId) {
-      const companyId = findUserIdByName(name);
-      if (companyId) {
-        setEditingUser(prev => ({...prev!, companyId}));
+    setEditingUser({...editingUser, name});
+    
+    // 이름으로 작업자 정보 찾기
+    if (name && !editingUser.companyId) {
+      const worker = allUsers.find(user => user.name === name);
+      if (worker && worker.companyId) {
+        setEditingUser({
+          ...editingUser,
+          companyId: worker.companyId,
+          email: worker.email || editingUser.email,
+          department: worker.department || editingUser.department
+        });
       }
     }
   };
@@ -633,11 +661,11 @@ export default function UsersPage() {
         <Table variant="simple" size="md">
           <Thead>
             <Tr>
-              <Th onClick={() => handleSort('name')} cursor="pointer">
-                이름 {sortField === 'name' && (sortDirection === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />)}
-              </Th>
               <Th onClick={() => handleSort('companyId')} cursor="pointer">
                 직원 ID {sortField === 'companyId' && (sortDirection === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />)}
+              </Th>
+              <Th onClick={() => handleSort('name')} cursor="pointer">
+                이름 {sortField === 'name' && (sortDirection === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />)}
               </Th>
               <Th onClick={() => handleSort('email')} cursor="pointer">
                 이메일 {sortField === 'email' && (sortDirection === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />)}
@@ -653,8 +681,8 @@ export default function UsersPage() {
             {filteredUsers.length > 0 ? (
               currentUsers.map((user) => (
                 <Tr key={user.id}>
-                  <Td>{user.name}</Td>
                   <Td>{user.companyId}</Td>
+                  <Td>{user.name}</Td>
                   <Td>{user.email}</Td>
                   <Td>{user.department}</Td>
                   <Td>
@@ -788,6 +816,15 @@ export default function UsersPage() {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
+              <FormControl>
+                <FormLabel>직원 ID</FormLabel>
+                <Input 
+                  value={editingUser?.companyId || ''}
+                  onChange={handleCompanyIdChange}
+                  placeholder="직원 ID를 입력하세요"
+                />
+              </FormControl>
+              
               <FormControl isRequired>
                 <FormLabel>이름</FormLabel>
                 <Input 
@@ -802,15 +839,6 @@ export default function UsersPage() {
                   type="email"
                   value={editingUser?.email || ''}
                   onChange={(e) => setEditingUser({...editingUser!, email: e.target.value})}
-                />
-              </FormControl>
-              
-              <FormControl>
-                <FormLabel>직원 ID</FormLabel>
-                <Input 
-                  value={editingUser?.companyId || ''}
-                  onChange={handleCompanyIdChange}
-                  placeholder="직원 ID를 입력하세요"
                 />
               </FormControl>
               

@@ -23,14 +23,18 @@ let departments = [
   { id: 'dept-2', name: '품질', value: '품질' },
   { id: 'dept-3', name: '유지보수', value: '유지보수' },
   { id: 'dept-4', name: '안전', value: '안전' },
+  { id: 'dept-5', name: '시스템책임자', value: 'system' },
 ];
 
 let workers: Worker[] = [
   { id: 'worker-1', name: '김작업자', companyId: 'EMP001', email: 'worker1@example.com', department: '생산', role: 'WORKER' },
   { id: 'worker-2', name: '이엔지니어', companyId: 'EMP002', email: 'worker2@example.com', department: '품질', role: 'WORKER' },
   { id: 'worker-3', name: '박기술자', companyId: 'EMP003', email: 'worker3@example.com', department: '유지보수', role: 'WORKER' },
-  { id: 'worker-4', name: '최관리자', companyId: 'EMP004', email: 'worker4@example.com', department: '안전', role: 'MANAGER' },
+  { id: 'worker-4', name: 'Thomas cha', companyId: 'EMP004', email: 'worker4@example.com', department: '안전', role: 'MANAGER' },
   { id: 'worker-5', name: '정감독관', companyId: 'EMP005', email: 'worker5@example.com', department: '생산', role: 'MANAGER' },
+  { id: 'worker-6', name: 'Thomas cha', companyId: 'EMP0001', email: 'thomas@coilmaster.com', department: 'system', role: 'MANAGER' },
+  { id: 'worker-7', name: 'Toy', companyId: 'EMP0002', email: 'toy@toy.com', department: '생산', role: 'MANAGER' },
+  { id: 'worker-8', name: 'Sam', companyId: 'EMP0003', email: 'sam@sam.com', department: '생산', role: 'MANAGER' },
 ];
 
 let issueTypes = [
@@ -137,6 +141,30 @@ export async function PUT(request: NextRequest) {
       }
       return NextResponse.json({ success: true, departments });
     } else if (type === 'workers') {
+      // 직원 ID 중복 검사
+      if (!item.id) {
+        // 새 작업자 추가 시
+        const isDuplicateId = workers.some(w => w.companyId === item.companyId);
+        if (isDuplicateId) {
+          return NextResponse.json({ 
+            error: '이미 있는 ID입니다', 
+            message: '이미 등록된 직원 ID입니다. 다른 ID를 사용해주세요.' 
+          }, { status: 400 });
+        }
+      } else {
+        // 기존 작업자 수정 시, 다른 작업자와 ID가 중복되는지 확인
+        const existingWorker = workers.find(w => w.id === item.id);
+        if (existingWorker && existingWorker.companyId !== item.companyId) {
+          const isDuplicateId = workers.some(w => w.companyId === item.companyId && w.id !== item.id);
+          if (isDuplicateId) {
+            return NextResponse.json({ 
+              error: '이미 있는 ID입니다', 
+              message: '이미 등록된 직원 ID입니다. 다른 ID를 사용해주세요.' 
+            }, { status: 400 });
+          }
+        }
+      }
+
       if (item.id) {
         workers = workers.map(w => w.id === item.id ? item : w);
       } else {
@@ -144,6 +172,10 @@ export async function PUT(request: NextRequest) {
         const newItem = { ...item, id: newId };
         workers.push(newItem);
       }
+
+      // 직원 ID 기준으로 정렬
+      workers.sort((a, b) => a.companyId.localeCompare(b.companyId));
+
       return NextResponse.json({ success: true, workers });
     } else if (type === 'issueTypes') {
       if (item.id) {

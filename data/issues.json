@@ -1178,5 +1178,130 @@
     "updatedAt": "2025-02-16T06:16:39.233Z",
     "resolvedAt": null,
     "solution": null
+  },
+  {
+    "id": "issue-51",
+    "title": "에폭시 과다도포",
+    "description": "ㅇㄹㅇㄴㅁㄹㅇㄴㅁㄹㅇㄴㅁ",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "department": "생산",
+    "issueType": "EQUIPMENT",
+    "assignedTo": {
+      "id": "46ba4e9d-84eb-492a-afd5-716c15e132ae",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "companyId": "EMP0002"
+    },
+    "createdBy": {
+      "id": "worker-7",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "companyId": "EMP0002",
+      "department": "생산"
+    },
+    "createdAt": "2025-03-13T00:42:30.606Z",
+    "updatedAt": "2025-03-13T00:42:30.606Z",
+    "resolvedAt": null,
+    "solution": null
+  },
+  {
+    "id": "1",
+    "title": "납땜문제",
+    "description": "ㅁㄴㅇㄹㅇㄴㅁㄹㅇㄴㅁㄹ",
+    "status": "OPEN",
+    "priority": "LOW",
+    "department": "품질",
+    "issueType": "EQUIPMENT",
+    "assignedTo": {
+      "id": "46ba4e9d-84eb-492a-afd5-716c15e132ae",
+      "name": "Toy",
+      "email": "toy@toy.com"
+    },
+    "createdBy": {
+      "id": "worker-7",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "companyId": "EMP0002",
+      "department": "생산"
+    },
+    "createdAt": "2025-03-13T01:59:09.629Z",
+    "updatedAt": "2025-03-13T01:59:09.629Z",
+    "resolvedAt": null,
+    "solution": null,
+    "attachments": [
+      {
+        "url": "/uploads/images/0f827a61-3a98-45ee-a2c9-f9b3926d81c3.png",
+        "name": "B5EA8095EDB895ECACB3EC848BECA48AEB84.png",
+        "size": 671761,
+        "type": "image/png"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "지그오염",
+    "description": "지그오염으로 제품불량",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "department": "생산",
+    "issueType": "WORKER",
+    "assignedTo": {
+      "id": "27d04595-7de4-4ca8-bb9c-0e33bb12606e",
+      "name": "Sam",
+      "email": "sam@sam.com"
+    },
+    "createdBy": {
+      "id": "worker-8",
+      "name": "Sam",
+      "email": "sam@sam.com",
+      "companyId": "EMP0003",
+      "department": "생산"
+    },
+    "createdAt": "2025-03-13T02:07:44.739Z",
+    "updatedAt": "2025-03-13T02:22:47.143Z",
+    "resolvedAt": "2025-03-13T02:22:47.143Z",
+    "solution": "수선함",
+    "attachments": [
+      {
+        "url": "/uploads/images/e9787c61-517d-4084-bd52-2c62ef1e3af2.jpg",
+        "name": "KakaoTalk_20250310_181259949.jpg",
+        "size": 182391,
+        "type": "image/jpeg"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "포장기",
+    "description": "포장기의 작동오류",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "department": "생산",
+    "issueType": "EQUIPMENT",
+    "assignedTo": {
+      "id": "46ba4e9d-84eb-492a-afd5-716c15e132ae",
+      "name": "Toy",
+      "email": "toy@toy.com"
+    },
+    "createdBy": {
+      "id": "worker-7",
+      "name": "Toy",
+      "email": "toy@toy.com",
+      "companyId": "EMP0002",
+      "department": "생산"
+    },
+    "createdAt": "2025-03-13T02:12:10.152Z",
+    "updatedAt": "2025-03-13T02:22:26.549Z",
+    "resolvedAt": "2025-03-13T02:22:26.549Z",
+    "solution": "잘고침",
+    "attachments": [
+      {
+        "url": "/uploads/videos/adec8993-e1d3-4fbe-b2a5-f4b05a20b6ff.mp4",
+        "name": "KakaoTalk_20250313_090903299.mp4",
+        "size": 7003966,
+        "type": "video/mp4"
+      }
+    ]
   }
 ]

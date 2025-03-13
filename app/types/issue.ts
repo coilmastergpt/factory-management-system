@@ -52,6 +52,7 @@ export interface Issue {
     name: string;
     email: string;
     companyId: string;
+    department?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -64,9 +65,9 @@ export interface Comment {
   content: string;
   createdAt: string;
   updatedAt: string;
-  author: {
+  createdBy: {
     id: string;
     name: string;
-    email: string;
+    email?: string;
   };
 } 

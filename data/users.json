@@ -1,16 +1,19 @@
 [
   {
     "id": "1",
-    "name": "관리자",
-    "email": "admin@example.com",
+    "name": "Thomas cha",
+    "email": "thomas@coilmaster.com",
+    "password": "0000",
     "role": "ADMIN",
     "department": "시스템관리",
-    "createdAt": "2025-03-12T04:32:47.671Z"
+    "createdAt": "2025-03-12T04:32:47.671Z",
+    "companyId": "EMP0001"
   },
   {
     "id": "eff007cf-363d-48fa-ac12-a69af69a45fd",
     "name": "김작업자",
     "email": "kim@kim.com",
+    "password": "1234",
     "role": "MANAGER",
     "department": "생산",
     "companyId": "EMP001",
@@ -20,27 +23,28 @@
     "id": "76d47899-f3ee-43f5-bf84-390bb7d914e2",
     "name": "박기술자",
     "email": "park@park.com",
+    "password": "2345",
     "role": "MANAGER",
     "department": "유지보수",
     "createdAt": "2025-03-12T10:04:54.534Z",
     "companyId": "EMP003"
   },
   {
-    "id": "694c8b72-dc63-4f95-b9a8-8e14a42aa6da",
-    "name": "Toy",
-    "email": "toy@toy.com",
-    "role": "MANAGER",
-    "department": "생산",
-    "createdAt": "2025-03-12T10:53:25.480Z",
-    "companyId": "EMP0001"
-  },
-  {
-    "id": "715cad6d-2045-4a86-8b7a-4277373f5041",
+    "id": "27d04595-7de4-4ca8-bb9c-0e33bb12606e",
     "name": "Sam",
     "email": "sam@sam.com",
     "role": "MANAGER",
     "department": "생산",
-    "createdAt": "2025-03-12T10:53:42.108Z",
+    "createdAt": "2025-03-12T23:54:29.442Z",
+    "companyId": "EMP0003"
+  },
+  {
+    "id": "46ba4e9d-84eb-492a-afd5-716c15e132ae",
+    "name": "Toy",
+    "email": "toy@toy.com",
+    "role": "MANAGER",
+    "department": "생산",
+    "createdAt": "2025-03-13T00:00:46.013Z",
     "companyId": "EMP0002"
   }
 ]

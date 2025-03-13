@@ -26,15 +26,20 @@
     "date-fns": "^3.3.1",
     "framer-motion": "^11.0.5",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "next": "14.1.0",
     "next-auth": "^4.24.11",
+    "next-connect": "^1.0.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
     "react-grid-layout": "^1.5.0",
     "react-icons": "^5.0.1",
-    "recharts": "^2.12.0"
+    "recharts": "^2.12.0",
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0",
+    "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",

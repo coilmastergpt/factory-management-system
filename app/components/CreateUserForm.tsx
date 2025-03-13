@@ -266,22 +266,22 @@ export default function CreateUserForm({ onUserCreated }: Props) {
     <Box as="form" onSubmit={handleSubmit} p={6} bg="white" borderRadius="lg" shadow="md">
       <VStack spacing={4}>
         <FormControl isRequired>
-          <FormLabel>이름</FormLabel>
-          <Input
-            name="name"
-            value={formData.name}
-            onChange={handleNameChange}
-            placeholder="관리자 이름"
-          />
-        </FormControl>
-
-        <FormControl isRequired>
           <FormLabel>직원 ID</FormLabel>
           <Input
             name="companyId"
             value={formData.companyId}
             onChange={handleCompanyIdChange}
             placeholder="직원 ID (예: EMP001)"
+          />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>이름</FormLabel>
+          <Input
+            name="name"
+            value={formData.name}
+            onChange={handleNameChange}
+            placeholder="관리자 이름"
           />
         </FormControl>
 

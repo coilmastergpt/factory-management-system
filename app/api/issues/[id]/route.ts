@@ -27,6 +27,7 @@ interface Issue {
     name: string;
     email: string;
     companyId: string;
+    department?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -78,6 +79,11 @@ export async function GET(
     
     if (!issue) {
       return NextResponse.json({ error: '이슈를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    // 최관리자가 발견자인 경우 부서 정보 추가
+    if (issue.createdBy.id === 'worker-4' && !issue.createdBy.department) {
+      issue.createdBy.department = '안전';
     }
 
     return NextResponse.json(issue);

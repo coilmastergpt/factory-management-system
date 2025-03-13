@@ -15,9 +15,18 @@ import {
   VStack,
   Textarea,
   useToast,
+  Box,
+  Flex,
+  Text,
+  HStack,
+  IconButton,
+  Image,
+  Progress,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { AddIcon, CloseIcon } from '@chakra-ui/icons';
+import { useFileUpload } from './FileUploadHelper';
 
 interface CreateIssueModalProps {
   isOpen: boolean;
@@ -37,6 +46,11 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
     category: '',
     location: '',
   });
+  
+  // 파일 업로드 관련 상태 및 기능
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploading, uploadFiles, formatFileSize } = useFileUpload();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +58,22 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
 
     setIsLoading(true);
     try {
+      // 먼저 파일 업로드
+      let attachments: Array<{
+        url: string;
+        name: string;
+        size: number;
+        type: string;
+      }> = [];
+      
+      if (selectedFiles.length > 0) {
+        // File[]를 FileList로 변환
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        attachments = await uploadFiles(dataTransfer.files);
+      }
+      
+      // 이슈 생성 요청
       const response = await fetch('/api/issues', {
         method: 'POST',
         headers: {
@@ -52,6 +82,7 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
         body: JSON.stringify({
           ...formData,
           reporterId: user.id,
+          attachments: attachments.length > 0 ? attachments : undefined,
         }),
       });
 
@@ -66,6 +97,7 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
         isClosable: true,
       });
       
+      // 폼 초기화
       setFormData({
         title: '',
         description: '',
@@ -74,6 +106,7 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
         category: '',
         location: '',
       });
+      setSelectedFiles([]);
       
       onSuccess();
     } catch (error) {
@@ -93,6 +126,24 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  // 파일 선택 처리
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const newFiles = Array.from(e.target.files);
+    setSelectedFiles(prev => [...prev, ...newFiles]);
+  };
+  
+  // 선택된 파일 제거
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  // 파일 선택 버튼 클릭
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -164,12 +215,74 @@ export default function CreateIssueModal({ isOpen, onClose, onSuccess }: CreateI
                   placeholder="이슈가 발생한 위치를 입력하세요"
                 />
               </FormControl>
+              
+              {/* 파일 업로드 섹션 */}
+              <FormControl>
+                <FormLabel>첨부 파일</FormLabel>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                  multiple
+                  accept="image/*,video/*"
+                />
+                <Button
+                  leftIcon={<AddIcon />}
+                  onClick={handleFileButtonClick}
+                  size="sm"
+                  mb={2}
+                  isDisabled={uploading}
+                >
+                  파일 추가
+                </Button>
+                
+                {uploading && (
+                  <Box mt={2} mb={2}>
+                    <Text mb={1}>파일 업로드 중...</Text>
+                    <Progress size="sm" isIndeterminate colorScheme="blue" />
+                  </Box>
+                )}
+                
+                {selectedFiles.length > 0 && (
+                  <Box mt={2} borderWidth="1px" borderRadius="md" p={2}>
+                    <Text mb={2} fontWeight="bold">선택된 파일 ({selectedFiles.length}개)</Text>
+                    <VStack align="stretch" spacing={2}>
+                      {selectedFiles.map((file, index) => (
+                        <Flex key={index} justify="space-between" align="center">
+                          <HStack>
+                            {file.type.startsWith('image/') && (
+                              <Image
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                boxSize="40px"
+                                objectFit="cover"
+                                borderRadius="md"
+                              />
+                            )}
+                            <Box>
+                              <Text fontSize="sm" noOfLines={1}>{file.name}</Text>
+                              <Text fontSize="xs" color="gray.500">{formatFileSize(file.size)}</Text>
+                            </Box>
+                          </HStack>
+                          <IconButton
+                            aria-label="파일 제거"
+                            icon={<CloseIcon />}
+                            size="xs"
+                            onClick={() => handleRemoveFile(index)}
+                          />
+                        </Flex>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+              </FormControl>
 
               <Button
                 type="submit"
                 colorScheme="blue"
                 width="full"
-                isLoading={isLoading}
+                isLoading={isLoading || uploading}
               >
                 생성
               </Button>

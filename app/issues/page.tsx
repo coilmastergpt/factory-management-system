@@ -46,6 +46,7 @@ import { AddIcon, ChevronDownIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon
 import { useRouter } from 'next/navigation';
 import IssueFilterComponent from '../components/IssueFilter';
 import FilterPresetManager from '../components/FilterPresetManager';
+import { useFileUpload, UploadedFile } from '../components/FileUploadHelper';
 
 // 이슈 타입 정의
 interface Issue {
@@ -70,6 +71,12 @@ interface Issue {
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+  }>;
 }
 
 // 필터 타입 정의
@@ -144,7 +151,13 @@ export default function IssuesPage() {
     issueType: '',
     createdById: '',
     createdByName: '',
-    assignedToId: ''
+    assignedToId: '',
+    attachments: [] as Array<{
+      url: string;
+      name: string;
+      size: number;
+      type: string;
+    }>
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -157,6 +170,9 @@ export default function IssuesPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [issueTypes, setIssueTypes] = useState<{id: string, name: string, value: string}[]>([]);
   const [priorities, setPriorities] = useState<{id: string, name: string, value: string, color: string}[]>([]);
+  
+  // 파일 업로드 훅 사용
+  const { uploading, uploadFiles } = useFileUpload();
   
   // 설정 데이터 가져오기
   useEffect(() => {
@@ -262,7 +278,48 @@ export default function IssuesPage() {
     }
   };
   
-  // 새 이슈 생성
+  // 파일 업로드 처리
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    try {
+      const files = await uploadFiles(e.target.files);
+      
+      if (files.length > 0) {
+        setNewIssue(prev => ({
+          ...prev,
+          attachments: [...(prev.attachments || []), ...files]
+        }));
+        
+        toast({
+          title: '파일 업로드 성공',
+          description: `${files.length}개의 파일이 업로드되었습니다.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('파일 업로드 오류:', error);
+      toast({
+        title: '파일 업로드 실패',
+        description: '파일 업로드 중 오류가 발생했습니다.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+  
+  // 파일 삭제 처리
+  const handleRemoveFile = (index: number) => {
+    setNewIssue(prev => ({
+      ...prev,
+      attachments: prev.attachments?.filter((_, i) => i !== index) || []
+    }));
+  };
+  
+  // 이슈 생성
   const handleCreateIssue = async () => {
     try {
       if (!newIssue.title.trim()) {
@@ -303,7 +360,10 @@ export default function IssuesPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newIssue),
+        body: JSON.stringify({
+          ...newIssue,
+          attachments: newIssue.attachments
+        }),
       });
       
       if (!response.ok) throw new Error('이슈 생성에 실패했습니다.');
@@ -327,7 +387,8 @@ export default function IssuesPage() {
         issueType: '',
         createdById: '',
         createdByName: '',
-        assignedToId: ''
+        assignedToId: '',
+        attachments: []
       });
       
       // 이슈 목록 새로고침
@@ -515,6 +576,7 @@ export default function IssuesPage() {
             <Table variant="simple">
               <Thead bg="gray.50">
                 <Tr>
+                  <Th width="80px">번호</Th>
                   <Th cursor="pointer" onClick={() => handleSortChange('title')}>
                     제목
                     {sort.field === 'title' && (
@@ -558,15 +620,13 @@ export default function IssuesPage() {
                     cursor="pointer"
                     onClick={() => navigateToIssueDetail(issue.id)}
                   >
+                    <Td>
+                      <Badge colorScheme="blue" borderRadius="full" px={2}>
+                        {isNaN(parseInt(issue.id)) ? issue.id.split('-')[1] : issue.id}
+                      </Badge>
+                    </Td>
                     <Td fontWeight="medium">
-                      <Flex alignItems="center">
-                        <Badge mr={2} colorScheme="blue" borderRadius="full" px={2}>
-                          {pagination.page > 1 
-                            ? (pagination.page - 1) * pagination.limit + index + 1 
-                            : index + 1}
-                        </Badge>
-                        {issue.title}
-                      </Flex>
+                      {issue.title}
                     </Td>
                     <Td>
                       <Badge colorScheme={statusColors[issue.status]}>
@@ -682,6 +742,107 @@ export default function IssuesPage() {
                 />
               </FormControl>
               
+              {/* 파일 첨부 영역 */}
+              <FormControl>
+                <FormLabel>파일 첨부</FormLabel>
+                <Box border="1px dashed" borderColor="gray.300" p={4} borderRadius="md">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                    disabled={uploading}
+                  />
+                  <Flex direction="column" align="center">
+                    <Button
+                      as="label"
+                      htmlFor="file-upload"
+                      colorScheme="blue"
+                      variant="outline"
+                      isLoading={uploading}
+                      loadingText="업로드 중..."
+                      mb={3}
+                    >
+                      이미지/동영상 선택
+                    </Button>
+                    <Text fontSize="sm" color="gray.500">
+                      이미지(10MB 이하) 또는 동영상(100MB 이하) 파일을 선택하세요.
+                    </Text>
+                    <Text fontSize="xs" color="gray.400">
+                      파일은 자동으로 최적화되어 저장됩니다.
+                    </Text>
+                  </Flex>
+                </Box>
+                
+                {/* 첨부 파일 미리보기 */}
+                {newIssue.attachments.length > 0 && (
+                  <Box mt={4}>
+                    <Text fontWeight="medium" mb={2}>첨부된 파일 ({newIssue.attachments.length}개)</Text>
+                    <VStack spacing={2} align="stretch">
+                      {newIssue.attachments.map((file, index) => (
+                        <Flex 
+                          key={index} 
+                          p={2} 
+                          border="1px solid" 
+                          borderColor="gray.200" 
+                          borderRadius="md"
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Flex align="center">
+                            {file.type.startsWith('image/') ? (
+                              <Box mr={3} width="50px" height="50px">
+                                <img 
+                                  src={file.url} 
+                                  alt={file.name} 
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover',
+                                    borderRadius: '4px'
+                                  }} 
+                                />
+                              </Box>
+                            ) : (
+                              <Box 
+                                mr={3} 
+                                width="50px" 
+                                height="50px" 
+                                bg="gray.100" 
+                                borderRadius="4px"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                              >
+                                <Text fontSize="xs">비디오</Text>
+                              </Box>
+                            )}
+                            <VStack spacing={0} align="start">
+                              <Text fontSize="sm" fontWeight="medium" noOfLines={1}>
+                                {file.name}
+                              </Text>
+                              <Text fontSize="xs" color="gray.500">
+                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                              </Text>
+                            </VStack>
+                          </Flex>
+                          <Button 
+                            size="sm" 
+                            colorScheme="red" 
+                            variant="ghost"
+                            onClick={() => handleRemoveFile(index)}
+                          >
+                            삭제
+                          </Button>
+                        </Flex>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+              </FormControl>
+              
               <FormControl isRequired>
                 <FormLabel>우선순위</FormLabel>
                 <Select 
@@ -759,7 +920,11 @@ export default function IssuesPage() {
             <Button variant="ghost" mr={3} onClick={onClose}>
               취소
             </Button>
-            <Button colorScheme="blue" onClick={handleCreateIssue}>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleCreateIssue}
+              isDisabled={!newIssue.title || !newIssue.priority || !newIssue.department || !newIssue.issueType || !newIssue.createdById}
+            >
               생성
             </Button>
           </ModalFooter>

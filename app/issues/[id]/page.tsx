@@ -40,11 +40,13 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
+  IconButton,
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import CommentSection from '../../components/CommentSection';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import { useFileUpload } from '../../components/FileUploadHelper';
 
 interface Issue {
   id: string;
@@ -64,11 +66,18 @@ interface Issue {
     name: string;
     companyId: string;
     email: string;
+    department: string;
   };
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
   solution?: string;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+  }>;
 }
 
 interface Comment {
@@ -198,11 +207,113 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
   const [managers, setManagers] = useState<Worker[]>([]);
   const [users, setUsers] = useState<User[]>([]); // 사용자 관리의 사용자 목록
   
+  // 파일 업로드 훅 사용
+  const { uploading, uploadFiles } = useFileUpload();
+  
   // 삭제 확인 다이얼로그
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const onDeleteAlertClose = () => setIsDeleteAlertOpen(false);
   const onDeleteAlertOpen = () => setIsDeleteAlertOpen(true);
+
+  // 이미지 모달 상태
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { isOpen: isImageOpen, onOpen: onImageOpen, onClose: onImageClose } = useDisclosure();
+  
+  // 이미지 선택 처리
+  const handleImageClick = (url: string) => {
+    setSelectedImage(url);
+    onImageOpen();
+  };
+  
+  // 파일 업로드 처리
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    try {
+      // 파일 업로드 및 최적화
+      const uploadedFiles = await uploadFiles(e.target.files);
+      
+      if (uploadedFiles.length > 0) {
+        // 업로드된 파일을 이슈에 추가
+        const response = await fetch(`/api/issues/${params.id}/attachments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            attachments: uploadedFiles
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('첨부 파일 추가에 실패했습니다.');
+        }
+        
+        // 이슈 정보 새로고침
+        fetchIssueDetail();
+        
+        toast({
+          title: '첨부 파일 추가 완료',
+          description: `${uploadedFiles.length}개의 파일이 이슈에 추가되었습니다.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('파일 업로드 오류:', error);
+      toast({
+        title: '파일 업로드 실패',
+        description: '파일 업로드 중 오류가 발생했습니다.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      // 파일 입력 필드 초기화
+      e.target.value = '';
+    }
+  };
+  
+  // 첨부 파일 삭제
+  const handleRemoveFile = async (index: number) => {
+    try {
+      const response = await fetch(`/api/issues/${params.id}/attachments`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          attachmentIndex: index
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('첨부 파일 삭제에 실패했습니다.');
+      }
+      
+      // 이슈 정보 새로고침
+      fetchIssueDetail();
+      
+      toast({
+        title: '첨부 파일 삭제 완료',
+        description: '첨부 파일이 삭제되었습니다.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('첨부 파일 삭제 오류:', error);
+      toast({
+        title: '첨부 파일 삭제 실패',
+        description: '첨부 파일 삭제 중 오류가 발생했습니다.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
 
   const fetchIssueDetail = async () => {
     try {
@@ -406,7 +517,12 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
     <Container maxW="container.xl" py={8}>
       <VStack align="stretch" spacing={6}>
         <HStack justify="space-between">
-          <Heading size="lg">{issue.title}</Heading>
+          <Flex alignItems="center">
+            <Heading size="lg">{issue.title}</Heading>
+            <Badge ml={2} colorScheme="blue" fontSize="md" borderRadius="full" px={2}>
+              #{issue.id.split('-')[1] || ''}
+            </Badge>
+          </Flex>
           <HStack>
             <Button colorScheme="blue" onClick={onOpen}>
               상태 변경
@@ -426,12 +542,140 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
                   <Text whiteSpace="pre-wrap" mt={2}>{issue.description}</Text>
                 </Box>
 
-                {issue.solution && (
-                  <Box mt={4}>
-                    <Text fontSize="sm" color="gray.500">해결 방안</Text>
-                    <Text whiteSpace="pre-wrap" mt={2}>{issue.solution}</Text>
-                  </Box>
-                )}
+                {/* 첨부 파일 섹션 */}
+                <Box mt={4}>
+                  <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                    <Text fontSize="sm" color="gray.500">첨부 파일</Text>
+                    <Box>
+                      <input
+                        type="file"
+                        id="file-upload"
+                        multiple
+                        accept="image/*,video/*"
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                        disabled={uploading}
+                      />
+                      <Button
+                        as="label"
+                        htmlFor="file-upload"
+                        size="xs"
+                        colorScheme="blue"
+                        leftIcon={<AddIcon />}
+                        isLoading={uploading}
+                        loadingText="업로드 중..."
+                      >
+                        파일 추가
+                      </Button>
+                    </Box>
+                  </Flex>
+                  
+                  {issue.attachments && issue.attachments.length > 0 ? (
+                    <>
+                      {/* 이미지 갤러리 */}
+                      {issue.attachments.filter(file => file.type.startsWith('image/')).length > 0 && (
+                        <Box mb={4}>
+                          <Text fontSize="sm" fontWeight="medium" mb={2}>
+                            이미지 ({issue.attachments.filter(file => file.type.startsWith('image/')).length}개)
+                          </Text>
+                          <Flex flexWrap="wrap" gap={3}>
+                            {issue.attachments
+                              .filter(file => file.type.startsWith('image/'))
+                              .map((file, index) => {
+                                const fileIndex = issue.attachments?.findIndex(f => f.url === file.url) ?? -1;
+                                return (
+                                  <Box 
+                                    key={index} 
+                                    position="relative"
+                                    width="120px" 
+                                    height="120px"
+                                    borderRadius="md"
+                                    overflow="hidden"
+                                    border="1px solid"
+                                    borderColor="gray.200"
+                                  >
+                                    <img 
+                                      src={file.url} 
+                                      alt={file.name} 
+                                      style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        cursor: 'pointer'
+                                      }} 
+                                      onClick={() => handleImageClick(file.url)}
+                                    />
+                                    <IconButton
+                                      aria-label="삭제"
+                                      icon={<CloseIcon />}
+                                      size="xs"
+                                      colorScheme="red"
+                                      position="absolute"
+                                      top={1}
+                                      right={1}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveFile(fileIndex);
+                                      }}
+                                    />
+                                  </Box>
+                                );
+                              })
+                            }
+                          </Flex>
+                        </Box>
+                      )}
+                      
+                      {/* 동영상 목록 */}
+                      {issue.attachments.filter(file => file.type.startsWith('video/')).length > 0 && (
+                        <Box>
+                          <Text fontSize="sm" fontWeight="medium" mb={2}>
+                            동영상 ({issue.attachments.filter(file => file.type.startsWith('video/')).length}개)
+                          </Text>
+                          <VStack spacing={4} align="stretch">
+                            {issue.attachments
+                              .filter(file => file.type.startsWith('video/'))
+                              .map((file, index) => {
+                                const fileIndex = issue.attachments?.findIndex(f => f.url === file.url) ?? -1;
+                                return (
+                                  <Box key={index} position="relative">
+                                    <Flex justifyContent="space-between" alignItems="center" mb={1}>
+                                      <Text fontSize="sm">{file.name}</Text>
+                                      <IconButton
+                                        aria-label="삭제"
+                                        icon={<DeleteIcon />}
+                                        size="xs"
+                                        colorScheme="red"
+                                        onClick={() => handleRemoveFile(fileIndex)}
+                                      />
+                                    </Flex>
+                                    <Box 
+                                      borderRadius="md" 
+                                      overflow="hidden"
+                                      border="1px solid"
+                                      borderColor="gray.200"
+                                    >
+                                      <video 
+                                        controls 
+                                        width="100%" 
+                                        style={{ maxHeight: '300px' }}
+                                      >
+                                        <source src={file.url} type={file.type} />
+                                        브라우저가 비디오 태그를 지원하지 않습니다.
+                                      </video>
+                                    </Box>
+                                  </Box>
+                                );
+                              })
+                            }
+                          </VStack>
+                        </Box>
+                      )}
+                    </>
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">첨부된 파일이 없습니다.</Text>
+                  )}
+                </Box>
               </VStack>
             </Box>
 
@@ -476,12 +720,12 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
                 <Divider />
 
                 <Box>
-                  <Text fontSize="sm" color="gray.500">생성자</Text>
+                  <Text fontSize="sm" color="gray.500">발견자</Text>
                   <Flex align="center" mt={1}>
                     <Avatar size="sm" name={issue.createdBy.name} mr={2} />
                     <Box>
                       <Text fontWeight="medium">{issue.createdBy.name} ({issue.createdBy.companyId})</Text>
-                      <Text fontSize="xs">{issue.createdBy.email}</Text>
+                      <Text fontSize="xs">{issue.createdBy.department || '부서 정보 없음'}</Text>
                     </Box>
                   </Flex>
                 </Box>
@@ -574,6 +818,27 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+
+      {/* 이미지 확대 모달 */}
+      <Modal isOpen={isImageOpen} onClose={onImageClose} size="full">
+        <ModalOverlay />
+        <ModalContent bg="rgba(0, 0, 0, 0.8)">
+          <ModalCloseButton color="white" />
+          <ModalBody display="flex" alignItems="center" justifyContent="center" p={0}>
+            {selectedImage && (
+              <img 
+                src={selectedImage} 
+                alt="확대된 이미지" 
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '90vh', 
+                  objectFit: 'contain' 
+                }} 
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 } 

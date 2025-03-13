@@ -152,6 +152,14 @@ export async function POST(request: NextRequest) {
     
     // 사용자 추가 및 저장
     users.push(newUser);
+    
+    // 직원 ID 기준으로 정렬
+    users.sort((a, b) => {
+      const companyIdA = a.companyId || '';
+      const companyIdB = b.companyId || '';
+      return companyIdA.localeCompare(companyIdB);
+    });
+    
     saveUsers(users);
     
     return NextResponse.json(newUser, { status: 201 });

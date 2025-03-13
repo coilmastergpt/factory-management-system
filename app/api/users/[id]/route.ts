@@ -7,9 +7,10 @@ interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: string;
   department: string;
-  companyId: string;
+  companyId?: string;
   createdAt: string;
 }
 
@@ -83,12 +84,20 @@ export async function PUT(
       const workers = await workersResponse.json();
       
       // 직원 ID가 작업자 관리에 등록되어 있는지 확인
-      const isWorkerRegistered = workers.some((worker: any) => worker.companyId === userData.companyId);
+      const worker = workers.find((worker: any) => worker.companyId === userData.companyId);
       
-      if (!isWorkerRegistered) {
+      if (!worker) {
         return NextResponse.json({ 
           error: '등록되지 않은 직원 ID', 
           message: '해당 직원 ID는 작업자 관리에 등록되어 있지 않습니다. 먼저 설정의 작업자 관리에서 등록해주세요.' 
+        }, { status: 400 });
+      }
+      
+      // 이름과 직원 ID가 일치하는지 확인
+      if (worker.name !== userData.name) {
+        return NextResponse.json({ 
+          error: '이름과 직원 ID 불일치', 
+          message: '입력한 이름과 직원 ID가 작업자 관리에 등록된 정보와 일치하지 않습니다.' 
         }, { status: 400 });
       }
     }
@@ -118,12 +127,21 @@ export async function PUT(
       role: userData.role,
       department: userData.department,
       companyId: userData.companyId || users[userIndex].companyId,
+      // 비밀번호는 기존 값 유지
+      password: users[userIndex].password
     };
     
     users[userIndex] = updatedUser;
     
+    // 직원 ID 기준으로 정렬
+    users.sort((a, b) => {
+      const companyIdA = a.companyId || '';
+      const companyIdB = b.companyId || '';
+      return companyIdA.localeCompare(companyIdB);
+    });
+    
     // 변경사항 저장
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(users, null, 2));
+    saveUsers(users);
     
     return NextResponse.json(updatedUser);
   } catch (error) {
